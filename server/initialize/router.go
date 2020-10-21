@@ -42,6 +42,22 @@ func Routers() *gin.Engine {
 	router.InitSysDictionaryRouter(ApiGroup)         // 字典管理
 	router.InitSysOperationRecordRouter(ApiGroup)    // 操作记录
 	router.InitEmailRouter(ApiGroup)                 // 邮件相关路由
+	router.InitNamespacesRouter(ApiGroup)            // 命名空间相关路由
+	router.InitBusinessRouter(ApiGroup)              // 一级业务线相关路由
+	router.InitSubBusinessRouter(ApiGroup)           // 二级业务线相关路由
+	router.InitAliasRouter(ApiGroup)                 // 别名配置相关路由
+	router.InitAppsRouter(ApiGroup)                  // APP信息相关路由
+	router.InitBuildHistoryRouter(ApiGroup)          // 构建信息相关路由
+	router.InitConfigRouter(ApiGroup)                // 配置信息相关路由
+	router.InitDeployRouter(ApiGroup)                // 部署信息相关路由
+	router.InitDeployHistoryRouter(ApiGroup)         // 部署历史相关路由
+	router.InitGatewayRouter(ApiGroup)               // 域名配置相关路由
+	router.InitHpaRouter(ApiGroup)                   // 自动扩展配置相关路由
+	router.InitLivenessRouter(ApiGroup)              // 健康检查配置相关路由
+	router.InitMetricsRouter(ApiGroup)               // 监控数据配置相关路由
+	router.InitReadinessRouter(ApiGroup)             // 就绪检查配置相关路由
+	router.InitResourcesRouter(ApiGroup)             // 资源配置相关路由
+	router.InitSysConfigRouter(ApiGroup)             // 系统变量配置相关路由
 
 	global.GVA_LOG.Info("router register success")
 	return Router

@@ -195,7 +195,7 @@ export default {
   },
   mounted() {
     let screenWidth = document.body.clientWidth
-    if (screenWidth < 1000) {
+     if (screenWidth < 1000) {
       this.isMobile = true
       this.isSider = false
       this.isCollapse = true

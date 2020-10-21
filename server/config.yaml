@@ -6,7 +6,7 @@ jwt:
 
 # zap logger configuration
 zap:
-  level: 'info'
+  level: 'debug'
   format: 'console'
   prefix: '[GIN-VUE-ADMIN]'
   director: 'log'
@@ -55,9 +55,9 @@ captcha:
 mysql:
   path: '127.0.0.1:3306'
   config: 'charset=utf8mb4&parseTime=True&loc=Local'
-  db-name: 'qmPlus'
+  db-name: 'gin_learn'
   username: 'root'
-  password: 'Aa@6447985'
+  password: '80958674x'
   max-idle-conns: 10
   max-open-conns: 10
   log-mode: false

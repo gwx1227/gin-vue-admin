@@ -49,6 +49,22 @@ func GormDBTables(db *gorm.DB) {
 		model.ExaSimpleUploader{},
 		model.ExaCustomer{},
 		model.SysOperationRecord{},
+		model.Namespaces{},
+		model.Businesss{},
+		model.Alias{},
+		model.Apps{},
+		model.BuildHistory{},
+		model.Config{},
+		model.Deploy{},
+		model.DeployHistory{},
+		model.Gateway{},
+		model.Hpa{},
+		model.Liveness{},
+		model.Metrics{},
+		model.Readiness{},
+		model.Resources{},
+		model.SubBusiness{},
+		model.SysConfig{},
 	)
 	if err != nil {
 		global.GVA_LOG.Error("register table failed", zap.Any("err", err))
@@ -84,7 +100,7 @@ func GormMysql() {
 // GormPostgreSql 初始化PostgreSql数据库
 func GormPostgreSql() {
 	p := global.GVA_CONFIG.Postgresql
-	dsn := "host="+ p.Host + " user=" + p.Username + " password=" + p.Password + " dbname=" + p.Dbname + " port=" + p.Port + " " + p.Config
+	dsn := "host=" + p.Host + " user=" + p.Username + " password=" + p.Password + " dbname=" + p.Dbname + " port=" + p.Port + " " + p.Config
 	postgresConfig := postgres.Config{
 		DSN:                  dsn,                    // DSN data source name
 		PreferSimpleProtocol: p.PreferSimpleProtocol, // 禁用隐式 prepared statement
