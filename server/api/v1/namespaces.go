@@ -99,7 +99,7 @@ func FindNamespaces(c *gin.Context) {
 	_ = c.ShouldBindQuery(&namespaces)
 	err, renamespaces := service.GetNamespaces(namespaces.ID)
 	if err != nil {
-		fmt.Println(c)
+		fmt.Println()
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {
 		response.OkWithData(gin.H{"renamespaces": renamespaces}, c)

@@ -99,7 +99,7 @@ export default {
       type: "",
       deleteVisible: false,
       multipleSelection: [],formData: {
-        appId:null,hostname:null,ip:null,
+        appId:1,hostname:null,ip:null,
       }
     };
   },

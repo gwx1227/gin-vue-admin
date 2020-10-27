@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
@@ -78,4 +79,15 @@ func GetSubBusinessInfoList(info request.SubBusinessSearch) (err error, list int
 	err = db.Count(&total).Error
 	err = db.Limit(limit).Offset(offset).Find(&subBusinesss).Error
 	return err, subBusinesss, total
+}
+
+
+func GetSubBusinessInfoListByBusinessId(businessId int) (err error, list interface{}) {
+	// 创建db
+	db := global.GVA_DB.Model(&model.SubBusiness{})
+	var subBusinesss []model.SubBusiness
+	// 如果有条件搜索 下方会自动创建搜索语句
+	err = db.Debug().Find(&subBusinesss, "business_id = ?", businessId).Error
+	fmt.Print("二级业务线获取信息: %l",subBusinesss)
+	return err, subBusinesss
 }

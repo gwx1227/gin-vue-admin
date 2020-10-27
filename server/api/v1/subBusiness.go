@@ -128,3 +128,16 @@ func GetSubBusinessList(c *gin.Context) {
 		}, c)
 	}
 }
+
+func GetSubBusinessListByBusinessId(c *gin.Context)  {
+	var subBusiness model.SubBusiness
+	_ = c.ShouldBindQuery(&subBusiness)
+	err, list := service.GetSubBusinessInfoListByBusinessId(subBusiness.BusinessId)
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("获取数据失败，%v", err), c)
+	} else {
+		response.OkWithData(resp.PageResult{
+			List:     list,
+		}, c)
+	}
+}

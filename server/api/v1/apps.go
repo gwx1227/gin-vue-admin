@@ -128,3 +128,20 @@ func GetAppsList(c *gin.Context) {
 		}, c)
 	}
 }
+
+
+func GetAppsListByNamespaceId(c *gin.Context) {
+	var pageInfo request.AppsSearch
+	_ = c.ShouldBindQuery(&pageInfo)
+	err, list, total := service.GetAppsInfoListByNamespaceId(pageInfo)
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("获取数据失败，%v", err), c)
+	} else {
+		response.OkWithData(resp.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, c)
+	}
+}

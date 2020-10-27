@@ -44,7 +44,7 @@ export const createNamespaces = (data) => {
  export const deleteNamespacesByIds = (data) => {
      return service({
          url: "/namespaces/deleteNamespacesByIds",
-         method: 'delete',
+         method: 'delete' ,
          data
      })
  }
@@ -98,3 +98,4 @@ export const createNamespaces = (data) => {
          params
      })
  }
+

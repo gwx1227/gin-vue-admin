@@ -101,6 +101,7 @@ export default {
       dialogFormVisible: false,
       visible: false,
       type: "",
+      current_appId: 1,
       deleteVisible: false,
       multipleSelection: [],formData: {
         appId:null,deployInfo:null,env:null,result:null,status:null,

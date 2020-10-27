@@ -98,3 +98,11 @@ export const createSubBusiness = (data) => {
          params
      })
  }
+
+ export const getSubBusinessListByBusinessId = (params) => {
+    return service({
+        url: "/subBusiness/getSubBusinessListByBusinessId",
+        method: 'get',
+        params
+    })
+}

@@ -15,5 +15,6 @@ func InitAppsRouter(Router *gin.RouterGroup) {
 		AppsRouter.PUT("updateApps", v1.UpdateApps)              // 更新Apps
 		AppsRouter.GET("findApps", v1.FindApps)                  // 根据ID获取Apps
 		AppsRouter.GET("getAppsList", v1.GetAppsList)            // 获取Apps列表
+		AppsRouter.GET("getAppsListByNamespaceId", v1.GetAppsListByNamespaceId)            // 根据命令空间ID获取Apps列表
 	}
 }

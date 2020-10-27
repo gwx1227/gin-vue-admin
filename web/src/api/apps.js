@@ -98,3 +98,11 @@ export const createApps = (data) => {
          params
      })
  }
+
+export const  getAppsListByNamespaceId = (params) => {
+    return service({
+        url: "/apps/getAppsListByNamespaceId",
+        method: 'get',
+        params
+    })
+}

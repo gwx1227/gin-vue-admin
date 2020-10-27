@@ -79,3 +79,16 @@ func GetAppsInfoList(info request.AppsSearch) (err error, list interface{}, tota
 	err = db.Limit(limit).Offset(offset).Find(&appss).Error
 	return err, appss, total
 }
+
+func GetAppsInfoListByNamespaceId(info request.AppsSearch) (err error, list interface{}, total int64) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+	// 创建db
+	db := global.GVA_DB.Model(&model.Apps{})
+	var appss []model.Apps
+	// 如果有条件搜索 下方会自动创建搜索语句
+	err = db.Count(&total).Error
+	err = db.Debug().Limit(limit).Offset(offset).Where("namespace_id = ?", info.NamespaceId).Find(&appss).Error
+	return err, appss, total
+}
+

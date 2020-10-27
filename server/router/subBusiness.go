@@ -15,5 +15,6 @@ func InitSubBusinessRouter(Router *gin.RouterGroup) {
 		SubBusinessRouter.PUT("updateSubBusiness", v1.UpdateSubBusiness)              // 更新SubBusiness
 		SubBusinessRouter.GET("findSubBusiness", v1.FindSubBusiness)                  // 根据ID获取SubBusiness
 		SubBusinessRouter.GET("getSubBusinessList", v1.GetSubBusinessList)            // 获取SubBusiness列表
+		SubBusinessRouter.GET("getSubBusinessListByBusinessId", v1.GetSubBusinessListByBusinessId)            // 根据一级业务线ID获取SubBusiness列表
 	}
 }
