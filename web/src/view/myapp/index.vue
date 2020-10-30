@@ -1,6 +1,6 @@
 <template>
 <div>
-<div v-show="current_app_id === null">
+<div v-if="currentAppId === null">
    <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
       我的应用
     </el-row>
@@ -13,21 +13,24 @@
           :label="item.namespace"
           :value="item.ID"
         />
-      </el-select>
-    </el-row>
+      </el-select> 
+         <span style="padding:20px"></span>
+       <el-button type="primary" @click="dialogFormVisibleAdd = true">创建应用</el-button>
+    </el-row> 
+    
     <el-tabs style="padding-left:20px;margin-top:20px;">
       <el-tab-pane label="应用">
         <el-row>
           <span style="padding:20px">应用名称</span>
           <el-select v-model="appvalue" filterable default-first-option clearable placeholder="请选择应用名称" @change="changeApp">
             <el-option
-              v-for="item in apps"
-              :key="item.id"
-              :label="item.app_name"
-              :value="item.id"
+              v-for="item in tableData"
+              :key="item.ID"
+              :label="item.appName"
+              :value="item.ID"
             />
           </el-select>
-          <el-button type="primary" @click="dialogFormVisibleAdd = true">创建应用</el-button>
+         
           <el-dialog append-to-body title="创建应用" :visible.sync="dialogFormVisibleAdd">
             <el-form :model="addData">
               <el-form-item label="应用名称" :required="true" :label-width="formLabelWidth">
@@ -114,33 +117,33 @@
         >
           <el-table-column
             v-show="false"
-            prop="id"
-            label="appid"
+            prop="ID"
+            label="appId"
             align="center"
           />
           <el-table-column
-            prop="app_name"
+            prop="appName"
             label="应用名称"
             align="center"
           />
           <el-table-column
-            prop="current_env"
+            prop="currentEnv"
             label="当前环境"
             align="center"
           />
           <el-table-column
-            prop="create_user"
+            prop="createUser"
             label="创建人"
             align="center"
           />
           <el-table-column
-            prop="create_at"
+            prop="CreatedAt"
             label="创建时间"
             align="center"
             :formatter="dateFormat"
           />
           <el-table-column
-            prop="update_at"
+            prop="UpdatedAt"
             label="更新时间"
             align="center"
             :formatter="dateFormat"
@@ -148,13 +151,22 @@
           <el-table-column
             label="详情"
             align="center"
-          ><template slot-scope="scope"><el-button icon="el-icon-search" circle @click="heanleInfo(scope.row.id)" /></template></el-table-column>
+          ><template slot-scope="scope"><el-button icon="el-icon-search" circle @click="heanleInfo(scope.row.ID)" /></template></el-table-column>
         </el-table>
-
+        <el-pagination
+          :current-page="appListQuery.page"
+          :page-size="appListQuery.pageSize"
+          :page-sizes="[10, 30, 50, 100]"
+          :style="{float:'right',padding:'20px'}"
+          :total="total"
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+          layout="total, sizes, prev, pager, next, jumper"
+        ></el-pagination>
       </el-tab-pane>
     </el-tabs>
 </div>
-<div v-show="current_app_id === 11">
+<div v-else="currentAppId !== null">
     <router-view></router-view>
     </div>
     </div>
@@ -166,28 +178,30 @@ import { getBusinessList } from '@/api/business'
 import { getSubBusinessListByBusinessId } from '@/api/subBusiness'
 import { createApps, getAppsListByNamespaceId } from  '@/api/apps'
 import { mapGetters } from 'vuex'
+import { store } from '@/store/index'
 import moment from 'moment'
 export default {
     name:"Myapps",
     data () {
       return {
+        test: getSubBusinessListByBusinessId,
         namespaces: [],
+        total: ''||0,
         namespace: '',
-        current_app_id: ''|| null,
+        // current_app_id: this.currentAppId|| null,
         nsvalue: '' || 1,
         apps: [],
         appvalue: '',
         appListQuery: {
+          page: ''||1,
+          pageSize: ''||10,
           namespaceId: this.nsvalue || 1,
-          app_id: this.appvalue || ''
+          ID: this.appvalue || ''
         },
         businessId: '',
         business: [],
         subbusinessId: '',
         subbusiness: [],
-        appsQuery: {
-          namespace_id: this.nsvalue || 1
-        },
         subbusinessQuery: {
           businessId: this.businessId
         },
@@ -236,7 +250,7 @@ export default {
         }
     },
     computed: {
-      ...mapGetters('user', ['userInfo']),
+      ...mapGetters('user', ['userInfo','currentAppId']),
     },
     watch: {
       businessId(val) {
@@ -247,16 +261,21 @@ export default {
         this.getSubBusinessData()
       },
       nsvalue(val) {
-        this.appsQuery.namespaceId = this.nsvalue
         this.appListQuery.namespaceId = val
         this.appvalue = ''
         this.getAppsListData()
-        this.getAppsData()
+      },
+      appvalue(val) {
+        this.appListQuery.namespaceId = this.nsvalue
+        this.appListQuery.ID = val
+        this.getAppsListData() 
       },
     },
     beforeMount() {
+      // this.nsvalue = 1
       this.getNamespacesListData()
       this.getBusinessData()
+      this.getAppsListData()
     },
     methods: {
       dateFormat(row, column) {
@@ -267,15 +286,13 @@ export default {
         return moment(date).format('YYYY-MM-DD HH:mm:ss')
       },
       getNamespacesListData() {
-        getNamespacesList().then(res => {
-         
+        getNamespacesList().then(res => { 
         this.namespaces = res.data.list
         })
       },
       getBusinessData() {
         getBusinessList().then(res => {
           this.business = res.data.list
-           console.log("返回结果: ",res.data.list);
         })
       },
       getSubBusinessData() {
@@ -285,19 +302,13 @@ export default {
       },
       getAppsListData() {
         getAppsListByNamespaceId(this.appListQuery).then(res => {
-          console.log("当前应用列表: ", res.data.list);
           this.tableData = res.data.list
+          this.total = res.data.total
         })
       },
-      // getAppsData() {
-      //   getApps(this.appsQuery).then(res => {
-      //     this.apps = res
-      //   })
-      // },
       changeNamespace(_value) {
-        this.namespace = _value
-        console.log("当前ID: ",_value);
-        console.log("当前nsID: ",this.nsvalue)
+        this.nsvalue = _value
+        console.log("当前NSID:",this.nsvalue);
       },
       createAppData() {
         this.dialogFormVisibleAdd = false
@@ -306,24 +317,44 @@ export default {
         this.addData.namespaceId = this.nsvalue
         createApps(this.addData).then(res => {
           console.log(res.code);
-          console.log("创建应用: ", this.addData);
-          // this.resetAddData()
+          this.getAppsListData()
         })
       }, 
       changeBusiness(_value) {
         this.businessId = _value
-        console.log("当前一级业务线ID:", _value);
       },
       changeSubBusiness(_value) {
         this.addData.subbusinessId = _value
-        console.log("当前二级业务线ID:", _value) 
       },
       changeApp(_value) {
         this.appvalue = _value
-        console.log('current app: ', this.appvalue)
+     
+      },
+      heanleInfo(val) {
+        console.log("当前应用ID1: ", this.currentAppId);
+        console.log("当前应用ID2: ", val);
+        // this.$router.push({
+        //   name: '/layout/myapp/appinfo',
+        //   params: {
+        //     ID: val
+        //   }
+        // })
+        // this.$store.dispatch('user/UpdateCurrentAppId',val)
+        store.commit('user/setCurrentAppId',val)
+        console.log("当前应用ID3: ", this.currentAppId) 
+        // this.current_app_id = val
+        // this.$store.dispatch('app/updateNsvalue', this.nsvalue)
+        // this.$store.dispatch('app/updateAppvalue', val)
+      },
+      handleSizeChange(val) {
+        this.appListQuery.pageSize = val
+        this.getAppsListData()
+      },
+      handleCurrentChange(val) {
+        this.appListQuery.page = val
+        this.getAppsListData()
       }
     },
-
 }
 </script>
 <style lang="scss">

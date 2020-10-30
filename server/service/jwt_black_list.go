@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gorm.io/gorm"
@@ -39,6 +40,7 @@ func IsBlacklist(jwt string) bool {
 // @return    redisJWT        string
 
 func GetRedisJWT(userName string) (err error, redisJWT string) {
+	fmt.Printf("用户key: %v", userName)
 	redisJWT, err = global.GVA_REDIS.Get(userName).Result()
 	return err, redisJWT
 }
@@ -53,6 +55,7 @@ func GetRedisJWT(userName string) (err error, redisJWT string) {
 func SetRedisJWT(jwt string, userName string) (err error) {
 	// 此处过期时间等于jwt过期时间
 	timer := 60 * 60 * 24 * 7 * time.Second
+	fmt.Printf("用户key: %v", userName)
 	err = global.GVA_REDIS.Set(userName, jwt, timer).Err()
 	return err
 }

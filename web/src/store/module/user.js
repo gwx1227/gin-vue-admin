@@ -11,6 +11,7 @@ export const user = {
             authority: "",
         },
         token: "",
+        currentAppId: ""||null,
     },
     mutations: {
         setUserInfo(state, userInfo) {
@@ -21,9 +22,18 @@ export const user = {
             // 这里的 `state` 对象是模块的局部状态
             state.token = token
         },
+        setCurrentAppId(state, currentAppId) {
+            console.log("获取应用ID: ",currentAppId);
+            state.currentAppId = currentAppId
+        },
+        ResetCurrentAppId(state, currentAppId) {
+            console.log("获取应用ID: ",currentAppId);
+            state.currentAppId = currentAppId
+        },
         LoginOut(state) {
             state.userInfo = {}
             state.token = ""
+            state.currentAppId = ""
             router.push({ name: 'login', replace: true })
             sessionStorage.clear()
             window.location.reload()
@@ -53,7 +63,10 @@ export const user = {
             if (res.code == 0) {
                 commit("LoginOut")
             }
-        }
+        },
+        async UpdateCurrentAppId({ commit }, currentAppId){
+                commit('setCurrentAppId', currentAppId)
+        }    
     },
     getters: {
         userInfo(state) {
@@ -61,6 +74,10 @@ export const user = {
         },
         token(state) {
             return state.token
+        },
+        currentAppId(state) {
+            console.log("获取应用I2D: ",state.currentAppId); 
+            return state.currentAppId
         },
 
     }

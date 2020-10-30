@@ -1,144 +1,220 @@
 <template>
-<div>
-  <div v-if="current_app === 11">
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">                              
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增apps表</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
-        </el-form-item>
-      </el-form>
-    </div>
-    <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
-      style="width: 100%"
-      tooltip-effect="dark"
-    >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="应用名称" prop="appName" width="120"></el-table-column> 
-    
-    <el-table-column label="businessId字段" prop="businessId" width="120"></el-table-column> 
-    
-    <el-table-column label="创建人" prop="createUser" width="120"></el-table-column> 
-    
-    <el-table-column label="当前应用环境" prop="currentEnv" width="120"></el-table-column> 
-    
-    <el-table-column label="域名开关" prop="gatewaySwitch" width="120">
-         <template slot-scope="scope">{{scope.row.gatewaySwitch|formatBoolean}}</template>
-    </el-table-column>
-    
-    <el-table-column label="代码地址" prop="gitUrl" width="120"></el-table-column> 
-    
-    <el-table-column label="自动扩展开关" prop="hpaSwitch" width="120">
-         <template slot-scope="scope">{{scope.row.hpaSwitch|formatBoolean}}</template>
-    </el-table-column>
-    
-    <el-table-column label="应用语言" prop="language" width="120"></el-table-column> 
-    
-    <el-table-column label="健康检查开关" prop="livenessSwitch" width="120">
-         <template slot-scope="scope">{{scope.row.livenessSwitch|formatBoolean}}</template>
-    </el-table-column>
-    
-    <el-table-column label="监控接入开关" prop="metricsSwitch" width="120">
-         <template slot-scope="scope">{{scope.row.metricsSwitch|formatBoolean}}</template>
-    </el-table-column>
-    
-    <el-table-column label="namespaceId字段" prop="namespaceId" width="120"></el-table-column> 
-    
-    <el-table-column label="就绪检查开关" prop="readinessSwitch" width="120">
-         <template slot-scope="scope">{{scope.row.readinessSwitch|formatBoolean}}</template>
-    </el-table-column>
-    
-    <el-table-column label="subbusinessId字段" prop="subbusinessId" width="120"></el-table-column> 
-    
-    <el-table-column label="更新人" prop="updateUser" width="120"></el-table-column> 
-    
-    <el-table-column label="服役状态标志位" prop="usable" width="120">
-         <template slot-scope="scope">{{scope.row.usable|formatBoolean}}</template>
-    </el-table-column>
-    
-      <el-table-column label="按钮组">
-        <template slot-scope="scope">
-          <el-button @click="updateApps(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteApps(scope.row)">确定</el-button>
-            </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div v-show="currentAppId !== null">
+            <el-button icon="el-icon-back" size="mini" type="primary" @click="resetCurrentAppId">返回应用列表</el-button>
+    <el-button  size="mini" type="primary" @click="dingwei">定位</el-button>
+    <el-card>
+      <el-table
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="appName"
+          label="应用名称"
+          align="center"
+        />
+        <el-table-column
+          prop="gitUrl"
+          label="代码地址"
+          align="center"
+        />
+        <el-table-column
+          prop="language"
+          label="编程语言"
+          align="center"
+        />
+        <el-table-column
+          prop="currentEnv"
+          label="应用环境"
+          align="center"
+        />
+      </el-table>
+      <el-table
+        :data="tableData"
+        border
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="business"
+          label="主业务线"
+          align="center"
+        />
+        <el-table-column
+          prop="subbusiness"
+          label="次业务线"
+          align="center"
+        />
+        <el-table-column
+          prop="createUser"
+          label="创建人员"
+          align="center"
+        />
+        <el-table-column
+          prop="CreatedAt"
+          label="创建时间"
+          align="center"
+          :formatter="dateFormat"
+        />
+      </el-table>
+    </el-card>
+    <br><br>
+    <el-card>
+      <el-table
+        :data="deployment_data"
+      >
+        <el-table-column
+          prop="pod_env"
+          label="流程状态"
+          align="center"
+        />
+        <el-table-column
+          prop="deployment_name"
+          label="实例名称"
+          align="center"
+        />
 
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
+        <el-table-column
+          prop="replicas"
+          label="副本数量"
+          align="center"
+        />
+        <el-table-column
+          prop="unavailable_replicas"
+          label="当前状态"
+          align="center"
+        ><template slot-scope="scope"><span v-if="scope.row.unavailable_replicas='null'" style="color: green">健康</span>
+          <span v-else style="color:red">不健康</span>
+        </template></el-table-column>
+        <el-table-column
+          prop="creation_timestamp"
+          label="应用时间"
+          align="center"
+          :formatter="dateFormat"
+        />
+        <el-table-column
+          label="操作"
+        > <template slot-scope="scope">
+          <el-button icon="el-icon-search" type="primary" circle @click="getPodsData(pod_env=scope.row.pod_env)" />
+          <el-dialog append-to-body title="POD详情" :visible.sync="dialogTableVisible">
+            <template>
+              <el-table
+                :data="pods_data"
+                style="width: 100%"
+              ><el-table-column type="expand">
+                 <template slot-scope="prop">
+                   <el-table :data="prop.row.container_data">
+                     <el-table-column
+                       align="center"
+                       prop="name"
+                       label="容器名称"
+                     />
+                     <el-table-column
+                       align="center"
+                       prop="ready"
+                       label="就绪状态"
+                     ><template slot-scope="scope_ready"><span v-if="scope_ready.row.unavailable_replicas='True'" style="color: green">健康</span>
+                       <span v-else style="color: yellow">不健康</span>
+                     </template></el-table-column>
+                     <el-table-column
+                       align="center"
+                       prop="restart_count"
+                       label="重启次数"
+                     />
+                     <el-table-column
+                       label="操作"
+                     > <template slot-scope="scope_terminal">
+                       <el-button icon="el-icon-search" type="primary" circle @click="toTerminal(pod=prop.row.name,container=scope_terminal.row.name)" />  </template>
+                     </el-table-column></el-table>
 
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
-    </el-dialog>
-  </div>
-  <div v-else><h1>hahaha</h1></div>
+                 </template>
+               </el-table-column>
+                <el-table-column
+                  prop="name"
+                  label="POD名称"
+                  align="center"
+                />
+                <el-table-column
+                  prop="pod_ip"
+                  label="POD地址"
+                  align="center"
+                />
+                <el-table-column
+                  prop="phase"
+                  label="POD状态"
+                  align="center"
+                ><template slot-scope="scope_phase"><span v-if="scope_phase.row.unavailable_replicas='Running'" style="color: green">健康</span>
+                  <span v-else style="color: yellow">不健康</span>
+                </template></el-table-column>
+                <el-table-column
+                  prop="container_count"
+                  label="容器数量"
+                  align="center"
+                />
+                <el-table-column
+                  prop="creation_timestamp"
+                  label="应用时间"
+                  align="center"
+                  :formatter="dateFormat"
+                />
+                <el-table-column
+                  prop="host_ip"
+                  label="宿主机IP"
+                  align="center"
+                />
+                <el-table-column
+                  prop="node_name"
+                  label="宿主机HOSTNAME"
+                  align="center"
+                />
+                <el-table-column
+                  label="操作"
+                > <template slot-scope="scope_pod">
+                  <el-button type="text" circle @click="restartPodData(pod_name=scope_pod.row.name)">重启</el-button>
+                </template> </el-table-column>
+              </el-table></template>
+          </el-dialog>
+
+        </template></el-table-column>
+      </el-table>
+    </el-card> 
   </div>
 </template>
 
 <script>
 import {
-    createApps,
-    deleteApps,
-    deleteAppsByIds,
-    updateApps,
     findApps,
-    getAppsList
 } from "@/api/apps";  //  此处请自行替换地址
+import {
+  getBusinessList,
+} from "@/api/business";
+import {
+  getSubBusinessList,
+} from "@/api/subBusiness";
 import { formatTimeToStr } from "@/utils/data";
-import infoList from "@/components/mixins/infoList";
-
+import { mapGetters, mapMutations} from 'vuex'
+import moment from 'moment'
 export default {
   name: "Apps",
-  mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
   data() {
     return {
-      listApi: getAppsList,
+      tableData: {},
+      deployment_data: [],
       dialogFormVisible: false,
       visible: false,
+      business: getBusinessList,
+      subbusiness: getSubBusinessList,
       type: "",
-      current_app: 11,
       deleteVisible: false,
-      multipleSelection: [],formData: {
+      query: {
+        ID: '',
+      },
+      multipleSelection: [],
+      formData: {
         appName:null,businessId:null,createUser:null,currentEnv:null,gatewaySwitch:null,gitUrl:null,hpaSwitch:null,language:null,livenessSwitch:null,metricsSwitch:null,namespaceId:null,readinessSwitch:null,subbusinessId:null,updateUser:null,usable:null,
       }
     };
@@ -160,49 +236,38 @@ export default {
       }
     }
   },
+  watch:{
+     currentAppId(val){
+       console.log("当前应用ID有变化: ",val);
+       this.getInfoData()
+     },
+
+  },
+  beforeMount() {
+    this.getInfoData()
+  },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10          
-        if (this.searchInfo.gatewaySwitch==""){
-          this.searchInfo.gatewaySwitch=null
-        }         
-        if (this.searchInfo.hpaSwitch==""){
-          this.searchInfo.hpaSwitch=null
-        }         
-        if (this.searchInfo.livenessSwitch==""){
-          this.searchInfo.livenessSwitch=null
-        }        
-        if (this.searchInfo.metricsSwitch==""){
-          this.searchInfo.metricsSwitch=null
-        }         
-        if (this.searchInfo.readinessSwitch==""){
-          this.searchInfo.readinessSwitch=null
-        }          
-        if (this.searchInfo.usable==""){
-          this.searchInfo.usable=null
-        }      
-        this.getTableData()
+      ...mapMutations('user',['ResetCurrentAppId']),
+      dingwei(){
+        console.log("当前数据: ", this.business); 
+      },
+      dateFormat(row, column) {
+        var date = row[column.property]
+        if (date === undefined) {
+          return ''
+        }
+        return moment(date).format('YYYY-MM-DD HH:mm:ss')
+      },
+      getInfoData() {
+        console.log("应用信息-当前ID:", this.query);
+        this.query.ID = this.currentAppId;
+        findApps(this.query).then(res => {
+          this.tableData = res.data.reapps
+          console.log("当前查询结果: ", res);
+        })
       },
       handleSelectionChange(val) {
         this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteAppsByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
       },
     async updateApps(row) {
       const res = await findApps({ ID: row.ID });
@@ -214,8 +279,7 @@ export default {
     },
     closeDialog() {
       this.dialogFormVisible = false;
-      this.formData = {
-        
+      this.formData = { 
           appName:null,
           businessId:null,
           createUser:null,
@@ -233,47 +297,14 @@ export default {
           usable:null,
       };
     },
-    async deleteApps(row) {
-      this.visible = false;
-      const res = await deleteApps({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
+    resetCurrentAppId() {
+      this.ResetCurrentAppId(null)
+      console.log("当前应用Id: ",this.currentAppId);
+      console.log("当前用户: ",this.userInfo.userName);
+      // this.$store.dispatch("user/UpdateCurrentAppId", "")
     },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createApps(this.formData);
-          break;
-        case "update":
-          res = await updateApps(this.formData);
-          break;
-        default:
-          res = await createApps(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
-        })
-        this.closeDialog();
-        this.getTableData();
-      }
-    },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
-  },
-  async created() {
-    await this.getTableData();}
-};
+  }
+}
 </script>
 
 <style>

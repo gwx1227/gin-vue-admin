@@ -6,3 +6,11 @@ type PageResult struct {
 	Page     int         `json:"page"`
 	PageSize int         `json:"pageSize"`
 }
+
+type Business struct {
+	Business string `json:"business"`
+}
+
+type Subbusiness struct {
+	Subbusiness string  `json:"subbusiness"`
+}
