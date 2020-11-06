@@ -128,3 +128,20 @@ func GetAliasList(c *gin.Context) {
 		}, c)
 	}
 }
+
+func GetAliasListByAppId(c *gin.Context) {
+	var pageInfo request.AliasSearch
+	_ = c.ShouldBindQuery(&pageInfo)
+	err, list, total := service.GetAliasInfoListByAppId(pageInfo)
+	//fmt.Println("token : %v", c.GetHeader("x-token"))
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("获取数据失败，%v", err), c)
+	} else {
+		response.OkWithData(resp.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, c)
+	}
+}

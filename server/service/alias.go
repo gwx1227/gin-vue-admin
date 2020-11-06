@@ -24,7 +24,7 @@ func CreateAlias(alias model.Alias) (err error) {
 // @return                    error
 
 func DeleteAlias(alias model.Alias) (err error) {
-	err = global.GVA_DB.Delete(alias).Error
+	err = global.GVA_DB.Debug().Where("id = ?", alias.ID).Delete(alias).Error
 	return err
 }
 
@@ -35,7 +35,8 @@ func DeleteAlias(alias model.Alias) (err error) {
 // @return                    error
 
 func DeleteAliasByIds(ids request.IdsReq) (err error) {
-	err = global.GVA_DB.Delete(&[]model.Alias{}, "id in ?", ids.Ids).Error
+
+	err = global.GVA_DB.Debug().Delete(&[]model.Alias{}, "id in ?", ids.Ids).Error
 	return err
 }
 
@@ -46,7 +47,8 @@ func DeleteAliasByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateAlias(alias *model.Alias) (err error) {
-	err = global.GVA_DB.Save(alias).Error
+	//err = global.GVA_DB.Debug().Save(alias).Error
+	err = global.GVA_DB.Debug().Where("app_id = ? and hostname = ?", alias.AppId,alias.Hostname).Updates(model.Alias{Ip:alias.Ip}).Error
 	return err
 }
 
@@ -59,6 +61,10 @@ func UpdateAlias(alias *model.Alias) (err error) {
 
 func GetAlias(id uint) (err error, alias model.Alias) {
 	err = global.GVA_DB.Where("id = ?", id).First(&alias).Error
+	return
+}
+func GetAliasByAppId(app_id uint) (err error, alias model.Alias) {
+	err = global.GVA_DB.Where("app_id = ?", app_id).First(&alias).Error
 	return
 }
 
@@ -77,5 +83,18 @@ func GetAliasInfoList(info request.AliasSearch) (err error, list interface{}, to
 	// 如果有条件搜索 下方会自动创建搜索语句
 	err = db.Count(&total).Error
 	err = db.Limit(limit).Offset(offset).Find(&aliass).Error
+	return err, aliass, total
+}
+
+
+func GetAliasInfoListByAppId(info request.AliasSearch) (err error, list interface{}, total int64) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+	// 创建db
+	db := global.GVA_DB.Model(&model.Alias{})
+	var aliass []model.Alias
+	// 如果有条件搜索 下方会自动创建搜索语句
+	err = db.Debug().Where("app_id = ?", info.AppId).Count(&total).Error
+	err = db.Debug().Limit(limit).Offset(offset).Where("app_id = ?", info.AppId).Find(&aliass).Error
 	return err, aliass, total
 }

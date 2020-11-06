@@ -2,7 +2,7 @@ package response
 
 import "gin-vue-admin/model"
 
-type AppsSearch struct {
+type AppInfo struct {
 	model.Apps
 	Subbusiness
 	Business

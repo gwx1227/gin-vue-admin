@@ -1,78 +1,76 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">      
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增alias表</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
-        </el-form-item>
-      </el-form>
-    </div>
+  <div v-if="currentAppId !== null">
+ <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
+      <el-button type="primary" round @click="dialogFormVisibleAdd = true">添加劫持</el-button>
+      <el-dialog append-to-body title="添加配置" :visible.sync="dialogFormVisibleAdd">
+        <el-form :model="addData">
+          <el-form-item label="IP" :label-width="formLabelWidth">
+            <el-input v-model="addData.ip" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="HOSTNAME" :label-width="formLabelWidth">
+            <el-input v-model="addData.hostname" autocomplete="off" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+          <el-button type="primary" @click="addAliasData()">确 定</el-button>
+        </div>
+      </el-dialog>
+    </el-row>
     <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
+      :data="alias_list"
       stripe
-      style="width: 100%"
-      tooltip-effect="dark"
+      align="center"
     >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联应用id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="劫持域名" prop="hostname" width="120"></el-table-column> 
-    
-    <el-table-column label="劫持IP" prop="ip" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
+      <el-table-column
+        prop="ip"
+        label="IP"
+        align="center"
+      />
+      <el-table-column
+        prop="hostname"
+        label="HOSTNAME"
+        align="center"
+      />
+      <el-table-column
+        fixed="right"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button @click="updateAlias(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteAlias(scope.row)">确定</el-button>
+            <template>
+            <el-popconfirm
+              confirm-button-text="好的"
+              cancel-button-text="不用了"
+              icon="el-icon-info"
+              icon-color="red"
+              :title="`确认要删除对域名 ${scope.row.hostname} 的劫持?`"
+              @confirm="deleteAliasData(id=scope.row.ID)"
+            >
+              <el-button slot="reference" type="danger" icon="el-icon-delete" circle />
+            </el-popconfirm>
+          </template>
+
+          <el-button icon="el-icon-edit" type="primary" circle @click="openEdit(ip=scope.row.ip,hostname=scope.row.hostname)" />
+
+          <el-dialog append-to-body title="修改劫持" :visible.sync="dialogFormVisible">
+            <el-form :model="editData">
+              <el-form-item label="HOSTNAME" :label-width="formLabelWidth">
+                <el-input v-model="editData.hostname" disabled autocomplete="off" />
+              </el-form-item>
+              <el-form-item label="IP" :label-width="formLabelWidth">
+                <el-input v-model="editData.ip" autocomplete="off" />
+              </el-form-item>
+
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="editAliasData()">确 定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
+          </el-dialog>
         </template>
       </el-table-column>
     </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -83,20 +81,42 @@ import {
     deleteAliasByIds,
     updateAlias,
     findAlias,
-    getAliasList
+    getAliasListByAppId,
 } from "@/api/alias";  //  此处请自行替换地址
+import { mapGetters, mapMutations} from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
-import infoList from "@/components/mixins/infoList";
 
 export default {
   name: "Alias",
-  mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
   data() {
     return {
-      listApi: getAliasList,
+      alias_list: [],
+      // dialogTableVisible: false,
       dialogFormVisible: false,
+      // dialogTableVisibleAdd: false,
+      dialogFormVisibleAdd: false,
+      formLabelWidth: '120px',
       visible: false,
       type: "",
+      addData: {
+        ip: '',
+        hostname: '',
+        appId: '',
+      },
+      editData: {
+        appId: '',
+        ip: '',
+        hostname: ''
+      },
+      deleteData: {
+        id: ''|| 1000,
+      },
+      query: {
+        appId: ''
+      },
       deleteVisible: false,
       multipleSelection: [],formData: {
         appId:1,hostname:null,ip:null,
@@ -120,89 +140,71 @@ export default {
       }
     }
   },
-  methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10       
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteAliasByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateAlias(row) {
-      const res = await findAlias({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.realias;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          hostname:null,
-          ip:null,
-      };
-    },
-    async deleteAlias(row) {
-      this.visible = false;
-      const res = await deleteAlias({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createAlias(this.formData);
-          break;
-        case "update":
-          res = await updateAlias(this.formData);
-          break;
-        default:
-          res = await createAlias(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
-        })
-        this.closeDialog();
-        this.getTableData();
-      }
-    },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
+  beforeMount() {
+    this.getAliasData()
   },
-  async created() {
-    await this.getTableData();}
+  methods: {
+    getAliasData() {
+      this.query.appId = this.currentAppId
+      getAliasListByAppId(this.query).then(res => {
+        this.alias_list = res.data.list
+      })
+    },
+    deleteAliasData(id) {
+      this.deleteData.id = id 
+      console.log("r1: ", this.deleteData)
+      console.log("r2: ", id)
+      deleteAlias(this.deleteData).then(res => {
+        this.getAliasData()
+        // this.deleteData.id = ''
+        this.$notify({
+          title: '成功',
+          message: '删除域名劫持信息完成.',
+          type: 'success'
+        })
+      })
+    }, 
+    resetAddData() {
+      this.addData.ip = ''
+      this.addData.hostname = ''
+    },
+    resetEditData() {
+      this.editData.ip = ''
+      this.editData.hostname = ''
+    },
+    editAliasData() {
+      this.editData.appId = this.currentAppId
+      this.dialogFormVisible = false
+      updateAlias(this.editData).then(res => {
+        this.resetEditData()
+        this.getAliasData()
+        this.$notify({
+          title: '成功',
+          message: '编辑域名劫持信息完成.',
+          type: 'success'
+        })
+      })
+    },
+    openEdit(ip, hostname) {
+      this.dialogFormVisible = true
+      this.editData.ip = ip
+      this.editData.hostname = hostname
+    },
+    addAliasData() {
+      this.addData.appId = this.currentAppId
+      this.dialogFormVisibleAdd = false
+      createAlias(this.addData).then(res => {
+        this.resetAddData()
+        this.getAliasData()
+        this.$notify({
+          title: '成功',
+          message: '添加域名劫持信息完成.',
+          type: 'success'
+        })
+      })
+    },
+  }, 
+  
 };
 </script>
 

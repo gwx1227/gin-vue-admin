@@ -97,4 +97,12 @@ export const createAlias = (data) => {
          method: 'get',
          params
      })
+}
+
+ export const getAliasListByAppId = (params) => {
+     return service({
+         url: "/alias/getAliasListByAppId",
+         method: 'get',
+         params
+     })
  }

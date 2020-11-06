@@ -18,6 +18,7 @@ const baseRouters = [{
 // 需要通过后台数据来生成的组件
 
 const createRouter = () => new Router({
+    // mode: 'history',
     routes: baseRouters
 })
 

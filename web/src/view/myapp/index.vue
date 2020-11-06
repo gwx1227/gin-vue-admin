@@ -166,7 +166,7 @@
       </el-tab-pane>
     </el-tabs>
 </div>
-<div v-else="currentAppId !== null">
+<div v-else="currentAppId != null">
     <router-view></router-view>
     </div>
     </div>
@@ -341,6 +341,7 @@ export default {
         // })
         // this.$store.dispatch('user/UpdateCurrentAppId',val)
         store.commit('user/setCurrentAppId',val)
+        store.
         console.log("当前应用ID3: ", this.currentAppId) 
         // this.current_app_id = val
         // this.$store.dispatch('app/updateNsvalue', this.nsvalue)

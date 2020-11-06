@@ -15,5 +15,6 @@ func InitAliasRouter(Router *gin.RouterGroup) {
 		AliasRouter.PUT("updateAlias", v1.UpdateAlias)              // 更新Alias
 		AliasRouter.GET("findAlias", v1.FindAlias)                  // 根据ID获取Alias
 		AliasRouter.GET("getAliasList", v1.GetAliasList)            // 获取Alias列表
+		AliasRouter.GET("getAliasListByAppId", v1.GetAliasListByAppId)            // 根据应用ID获取Alias列表
 	}
 }
