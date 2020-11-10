@@ -81,6 +81,13 @@ export const createDeploy = (data) => {
          params
      })
  }
+export const findDeployByAppId = (params) => {
+     return service({
+         url: "/deploy/findDeployByAppId",
+         method: 'get',
+         params
+     })
+ }
 
 
 // @Tags Deploy

@@ -65,6 +65,13 @@ export const createApps = (data) => {
      })
  }
 
+export const updateAppsSwitch = (data) => {
+     return service({
+         url: "/apps/updateAppsSwitch",
+         method: 'put',
+         data
+     })
+} 
 
 // @Tags Apps
 // @Summary 用id查询Apps

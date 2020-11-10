@@ -97,7 +97,7 @@ func UpdateLiveness(c *gin.Context) {
 func FindLiveness(c *gin.Context) {
 	var liveness model.Liveness
 	_ = c.ShouldBindQuery(&liveness)
-	err, reliveness := service.GetLiveness(liveness.ID)
+	err, reliveness := service.GetLiveness(liveness.AppId)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {

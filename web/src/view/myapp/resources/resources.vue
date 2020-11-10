@@ -1,109 +1,37 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">          
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增resources表</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
-        </el-form-item>
-      </el-form>
+    <div v-if="currentAppId !== null">
+
     </div>
-    <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
-      style="width: 100%"
-      tooltip-effect="dark"
-    >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联应用id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="CPU限额" prop="cpuLimit" width="120"></el-table-column> 
-    
-    <el-table-column label="CPU需求资源" prop="cpuRequests" width="120"></el-table-column> 
-    
-    <el-table-column label="MEM限额" prop="memLimit" width="120"></el-table-column> 
-    
-    <el-table-column label="MEM需求资源" prop="memRequests" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
-        <template slot-scope="scope">
-          <el-button @click="updateResources(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteResources(scope.row)">确定</el-button>
-            </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
-    </el-dialog>
-  </div>
 </template>
 
 <script>
 import {
-    createResources,
-    deleteResources,
-    deleteResourcesByIds,
-    updateResources,
-    findResources,
-    getResourcesList
+  
 } from "@/api/resources";  //  此处请自行替换地址
+import { mapGetters } from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
 
 export default {
   name: "Resources",
   mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
+  beforeMount() {
+    this.getDeployData()
+  },
   data() {
     return {
-      listApi: getResourcesList,
       dialogFormVisible: false,
       visible: false,
       type: "",
       deleteVisible: false,
+      query: {
+        appId: ''
+      },
       multipleSelection: [],formData: {
-        appId:null,cpuLimit:null,cpuRequests:null,memLimit:null,memRequests:null,
+        appId:null,argsInfo:null,argsSwitch:null,commandInfo:null,commandSwitch:null,containerPort:null,pullPolicy:null,replicaCountCanary:null,replicaCountOnline:null,repository:null,tagCanary:null,tagOnline:null,weigitCanary:null,weigitOnline:null,
       }
     };
   },
@@ -125,91 +53,13 @@ export default {
     }
   },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10         
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteResourcesByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateResources(row) {
-      const res = await findResources({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.reresources;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          cpuLimit:null,
-          cpuRequests:null,
-          memLimit:null,
-          memRequests:null,
-      };
-    },
-    async deleteResources(row) {
-      this.visible = false;
-      const res = await deleteResources({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createResources(this.formData);
-          break;
-        case "update":
-          res = await updateResources(this.formData);
-          break;
-        default:
-          res = await createResources(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
-        })
-        this.closeDialog();
-        this.getTableData();
-      }
-    },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
+   getDeployData(){
+     this.query.appId = this.currentAppId
+     
+
+   }, 
   },
-  async created() {
-    await this.getTableData();}
-};
+}
 </script>
 
 <style>

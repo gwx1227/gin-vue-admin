@@ -301,7 +301,6 @@ export default {
       this.ResetCurrentAppId(null)
       console.log("当前应用Id: ",this.currentAppId);
       console.log("当前用户: ",this.userInfo.userName);
-      // this.$store.dispatch("user/UpdateCurrentAppId", "")
     },
   }
 }

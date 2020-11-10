@@ -1,113 +1,141 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">              
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
+    <div v-if="currentAppId !== null">
+          <el-switch
+            v-model="livenessSwitch"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            inactive-text="关"
+            active-text="开"
+            @change="change_switch"
+          /><br>
+       <el-button type="primary" round @click="openEdit()">编辑信息</el-button>
+    <el-dialog append-to-body title="修改健康检查配置" :visible.sync="dialogFormVisible">
+      <el-form :model="editData">
+        <el-form-item :label-width="formLabelWidth">
         </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增liveness表</el-button>
+        <el-form-item label="认定失败次数" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.failureThreshold" :min="2" :max="10" @change="failure_threshold_HandleChange" />
         </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
+        <el-form-item label="初始探测延迟" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.initialDelaySeconds" :min="2" :max="60" @change="initial_delay_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="探测间隔时间" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.periodSeconds" :min="2" :max="10" @change="period_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="认定成功次数" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.successThreshold" :min="1" :max="10" @change="success_threshold_HandleChange" />
+        </el-form-item>
+        <el-form-item label="探测超时时间" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.timeoutSeconds" :min="1" :max="10" @change="timeout_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="应用探测路径" style="margin-bottom: 5px;">
+          <el-input
+            v-model="editData.path"
+            placeholder="例如: /healthcheck"
+            clearable
+            style="width:200px"
+          />
+
         </el-form-item>
       </el-form>
-    </div>
-    <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
-      style="width: 100%"
-      tooltip-effect="dark"
-    >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联应用id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="失败次数" prop="failureThreshold" width="120"></el-table-column> 
-    
-    <el-table-column label="初始化延迟探测时间" prop="initialDelaySeconds" width="120"></el-table-column> 
-    
-    <el-table-column label="健康检查路径" prop="path" width="120"></el-table-column> 
-    
-    <el-table-column label="探测间隔时间" prop="periodSeconds" width="120"></el-table-column> 
-    
-    <el-table-column label="探测成功次数" prop="successThreshold" width="120"></el-table-column> 
-    
-    <el-table-column label="探测超时时间" prop="timeoutSeconds" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
-        <template slot-scope="scope">
-          <el-button @click="updateLiveness(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteLiveness(scope.row)">确定</el-button>
-            </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editLivenessData()">确 定</el-button>
       </div>
     </el-dialog>
-  </div>
+    <el-card>
+      <el-form
+        :model="liveness"
+      >
+        <el-form-item label="认定失败次数" style="margin-bottom: 5px;">
+          <el-input-number v-model="liveness.failureThreshold" :min="2" :max="10" disabled @change="failure_threshold_HandleChange" />
+        </el-form-item>
+        <el-form-item label="初始探测延迟" style="margin-bottom: 5px;">
+          <el-input-number v-model="liveness.initialDelaySeconds" :min="2" :max="10" disabled @change="initial_delay_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="探测间隔时间" style="margin-bottom: 5px;">
+          <el-input-number v-model="liveness.periodSeconds" :min="2" :max="10" disabled @change="period_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="认定成功次数" style="margin-bottom: 5px;">
+          <el-input-number v-model="liveness.successThreshold" :min="2" :max="10" disabled @change="success_threshold_HandleChange" />
+        </el-form-item>
+        <el-form-item label="探测超时时间" style="margin-bottom: 5px;">
+          <el-input-number v-model="liveness.timeoutSeconds" :min="2" :max="10" disabled @change="timeout_seconds_HandleChange" />
+        </el-form-item>
+        <el-form-item label="应用探测路径" style="margin-bottom: 5px;">
+          <el-input
+            v-model="liveness.path"
+            placeholder="例如: /healthcheck"
+            clearable
+            style="width:200px"
+            disabled
+          />
+
+        </el-form-item>
+      </el-form>
+    </el-card>
+    </div>
 </template>
 
 <script>
 import {
-    createLiveness,
-    deleteLiveness,
-    deleteLivenessByIds,
-    updateLiveness,
-    findLiveness,
-    getLivenessList
+  updateLiveness,
+  findLiveness, 
 } from "@/api/liveness";  //  此处请自行替换地址
+import {
+  findApps,
+  updateAppsSwitch,
+} from '@/api/apps';
+import { mapGetters } from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
 
 export default {
   name: "Liveness",
   mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
+  beforeMount() {
+    this.getLivenessData()
+    this.getSwitchData()
+  },
   data() {
     return {
-      listApi: getLivenessList,
       dialogFormVisible: false,
       visible: false,
       type: "",
       deleteVisible: false,
-      multipleSelection: [],formData: {
-        appId:null,failureThreshold:null,initialDelaySeconds:null,path:null,periodSeconds:null,successThreshold:null,timeoutSeconds:null,
+      switchQuery: {
+        ID: ''
+      },
+      query: {
+        appId: ''
+      },
+      dialogFormVisibleAdd: false,
+      formLabelWidth: '120px',
+      livenessSwitch: '',
+      liveness: {
+        failureThreshold: '',
+        initialDelaySeconds: '',
+        path: '',
+        periodSeconds: '',
+        successThreshold: '',
+        timeoutSeconds: ''
+      },
+      editData: {
+        appId: '',
+        failureThreshold: '' || 3,
+        initialDelaySeconds: '' || 10,
+        path: '' || '/healthcheck',
+        periodSeconds: '' || 3,
+        successThreshold: '' || 1,
+        timeoutSeconds: '' || 2,
+      },
+      switchData: {
+        ID: '',
+        livenessSwitch: ''
       }
     };
   },
@@ -129,93 +157,69 @@ export default {
     }
   },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10           
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteLivenessByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateLiveness(row) {
-      const res = await findLiveness({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.reliveness;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          failureThreshold:null,
-          initialDelaySeconds:null,
-          path:null,
-          periodSeconds:null,
-          successThreshold:null,
-          timeoutSeconds:null,
-      };
-    },
-    async deleteLiveness(row) {
-      this.visible = false;
-      const res = await deleteLiveness({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createLiveness(this.formData);
-          break;
-        case "update":
-          res = await updateLiveness(this.formData);
-          break;
-        default:
-          res = await createLiveness(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
+    change_switch(value) {
+      this.switchData. livenessSwitch = value
+      this.switchData.ID = this.currentAppId
+      updateAppsSwitch(this.switchData).then(res => {
+        console.log("staus: ", res.code)
+        this.getSwitchData()
+        this.$notify({
+          title: '成功',
+          message: '调整健康检查开关完成.',
+          type: 'success'
         })
-        this.closeDialog();
-        this.getTableData();
-      }
+      })
     },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
+    getLivenessData() {
+      this.query.appId = this.currentAppId
+      findLiveness(this.query).then(res => {
+        this.liveness.failureThreshold = res.data.reliveness.failureThreshold
+        this.liveness.initialDelay_seconds = res.data.reliveness.initialDelaySeconds
+        this.liveness.path = res.data.reliveness.path
+        this.liveness.periodSeconds = res.data.reliveness.periodSeconds
+        this.liveness.successThreshold = res.data.reliveness.successThreshold
+        this.liveness.timeoutSeconds = res.data.reliveness.timeoutSeconds
+      })
+    },
+    getSwitchData() {
+      this.switchQuery.ID = this.currentAppId
+      findApps(this.switchQuery).then(res => {
+        this.livenessSwitch = res.data.reapps[0].livenessSwitch
+      })
+    },
+    openEdit() {
+      this.editData.appId = this.currentAppId
+      this.dialogFormVisible = true
+    },
+    editLivenessData() {
+      console.log('editData:', this.editData)
+      updateLiveness(this.editData).then(res => {
+        this.getLivenessData()
+        this.dialogFormVisible = false
+        this.$notify({
+          title: '成功',
+          message: '编辑健康检查信息完成.',
+          type: 'success'
+        })
+      })
+    },
+    failure_threshold_HandleChange(value) {
+      this.editData.failureThreshold = value
+    },
+    initial_delay_seconds_HandleChange(value) {
+      this.editData.initialDelaySeconds = value
+    },
+    period_seconds_HandleChange(value) {
+      this.editData.periodSeconds = value
+    },
+    success_threshold_HandleChange(value) {
+      this.editData.successThreshold = value
+    },
+    timeout_seconds_HandleChange(value) {
+      this.editData.timeoutSeconds = value
+    },
   },
-  async created() {
-    await this.getTableData();}
-};
+}
 </script>
 
 <style>

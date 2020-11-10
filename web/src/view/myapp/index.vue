@@ -31,45 +31,173 @@
             />
           </el-select>
          
-          <el-dialog append-to-body title="创建应用" :visible.sync="dialogFormVisibleAdd">
-            <el-form :model="addData">
-              <el-form-item label="应用名称" :required="true" :label-width="formLabelWidth">
-                <el-input v-model="addData.appName" autocomplete="off" placeholder="您的应用名称,例如: my-book-info" />
-              </el-form-item>
-              <el-form-item label="git地址" :required="true" :label-width="formLabelWidth">
-                <el-input v-model="addData.gitUrl" autocomplete="off" placeholder="您应用对应的git地址(注意:是ssh方式的),例如: git@github.com:gwx1227/helm.git" />
-              </el-form-item>
-              <el-form-item label="主业务线" :required="true" :label-width="formLabelWidth">
-                <el-select v-model="addData.businessId" placeholder="请选择一级业务线" @change="changeBusiness">
-                  <el-option
-                    v-for="item in business"
-                    :key="item.ID"
-                    :label="item.business"
-                    :value="item.ID"
-                  />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="次业务线" :required="true" :label-width="formLabelWidth">
-                <el-select v-model="addData.subbusinessId" placeholder="请选择二级业务线" @change="changeSubBusiness">
-                  <el-option
-                    v-for="item in subbusiness"
-                    :key="item.ID"
-                    :label="item.subbusiness"
-                    :value="item.ID"
-                  />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="开发语言" :required="true" :label-width="formLabelWidth">
-                <el-select v-model="addData.language" placeholder="请选择应用开发语言">
-                  <el-option
-                    v-for="item in languages"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.label"
-                  />
-                </el-select>
-              </el-form-item>
-               <el-form-item label="网关域名" :required="true" :label-width="formLabelWidth"> 
+  <el-dialog append-to-body title="创建应用" :visible.sync="dialogFormVisibleAdd">
+      <el-form ref="addData" :model="addData" label-position="top" :rules="rules" :inline="true" :label-width="formLabelWidth" class="demo-ruleForm">
+        <el-card>
+          <el-form-item label="namespace" :label-width="formLabelWidth">
+            <el-select v-model="addData.namespaceId" placeholder="请选择命名空间" @change="changeNamespace">
+              <el-option
+                v-for="item in namespaces"
+                :key="item.ID"
+                :label="item.namespace"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item><br>
+          <el-form-item label="应用名称" prop="app_name">
+            <span slot="label">
+              <span slot="reference">应用名称 </span>
+              <el-tooltip placement="top">
+                <div slot="content">
+                  <span>格式说明:</span><br>
+                  <span>例如: my-book-info</span>
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </span>
+            <el-input v-model="addData.appName" />
+          </el-form-item>
+          <el-form-item label="git地址" prop="git_url">
+            <span slot="label">
+              <span slot="reference">git地址 </span>
+              <el-tooltip placement="top">
+                <div slot="content">
+                  <span>说明:</span><br>
+                  <span>请输入ssh格式地址</span>
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </span>
+            <el-input v-model="addData.gitUrl" />
+          </el-form-item><br>
+          <el-form-item prop="container_port">
+            <span slot="label">
+              <span slot="reference">容器端口 </span>
+              <el-tooltip placement="top">
+                <div slot="content">
+                  <span>端口输入规范:</span><br>
+                  <span>数字，2-5个字符</span>
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </span>
+            <el-input v-model="addData.containerPort" />
+          </el-form-item>
+          <el-form-item label="镜像地址" prop="repository">
+            <span slot="label">
+              <span slot="reference">镜像地址 </span>
+              <el-tooltip placement="top">
+                <div slot="content">
+                  <span>镜像地址输入规范:</span><br>
+                  <span>建议标准: NAMESPACE/APPNAME ，80个字符以内</span>
+                </div>
+                <i class="el-icon-question" />
+              </el-tooltip>
+            </span>
+            <el-input v-model="addData.repository" />
+          </el-form-item>
+          <el-form-item label="镜像拉取策略" prop="pull_policy">
+            <span slot="label">
+              <span slot="reference">镜像拉取策略 </span>
+            </span>
+            <el-select v-model="addData.pullPolicy" placeholder="请选择镜像拉取策略">
+              <el-option
+                v-for="item in image_pull"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select></el-form-item><br>
+          <el-form-item label="主业务线" prop="business_id">
+            <span slot="label">
+              <span slot="reference">主业务线 </span>
+            </span>
+            <el-select v-model="addData.businessId" placeholder="请选择一级业务线" @change="changeBusiness">
+              <el-option
+                v-for="item in business"
+                :key="item.ID"
+                :label="item.business"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="次业务线" prop="subbusiness_id">
+            <span slot="label">
+              <span slot="reference">次业务线 </span>
+            </span>
+            <el-select v-model="addData.subbusinessId" placeholder="请选择二级业务线" @change="changeSubBusiness">
+              <el-option
+                v-for="item in subbusiness"
+                :key="item.ID"
+                :label="item.subbusiness"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="开发语言" prop="language">
+            <span slot="label">
+              <span slot="reference">开发语言 </span>
+            </span>
+            <el-select v-model="addData.language" placeholder="请选择应用开发语言">
+              <el-option
+                v-for="item in languages"
+                :key="item.value"
+                :label="item.label"
+                :value="item.label"
+              />
+            </el-select>
+          </el-form-item><br>
+          <el-form-item label="CPU限额" prop="cpu_limit">
+            <span slot="label">
+              <span slot="reference">CPU限额 </span>
+            </span>
+            <el-select v-model="addData.cpuLimit" placeholder="请选择最大申请CPU额度">
+              <el-option
+                v-for="item in cpu"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select></el-form-item>
+          <el-form-item label="CPU需求" prop="cpu_requests">
+            <span slot="label">
+              <span slot="reference">CPU需求 </span>
+            </span>
+            <el-select v-model="addData.cpuRequests" placeholder="请选择最小申请CPU额度">
+              <el-option
+                v-for="item in cpu"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select></el-form-item>
+          <el-form-item label="内存限额" prop="mem_limit">
+            <span slot="label">
+              <span slot="reference">内存限额 </span>
+            </span>
+            <el-select v-model="addData.memLimit" placeholder="请选择最大申请内存额度">
+              <el-option
+                v-for="item in mem"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select></el-form-item>
+          <el-form-item label="内存需求" prop="mem_requests">
+            <span slot="label">
+              <span slot="reference">内存需求 </span>
+            </span>
+            <el-select v-model="addData.memRequests" placeholder="请选择最小申请内存额度">
+              <el-option
+                v-for="item in mem"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select></el-form-item><br>
+        </el-card><br>
+        <el-card>
+           <el-form-item label="网关域名" :required="true" :label-width="formLabelWidth"> 
                <el-switch 
                 v-model="addData.gatewaySwitch"
                   active-text="开"
@@ -104,12 +232,75 @@
                 inactive-text="关"
               /> 
                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-              <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
-              <el-button type="primary" @click="createAppData()">确 定</el-button>
+        </el-card><br>
+        <el-card>
+          <h3>COMMAND开关<el-tooltip placement="top">
+            <div slot="content">
+              <span>说明:</span><br>
+              <span>如果仅为容器定义了command字段,那么它将覆盖镜像中定义的程序及参数,并以无参数方式运行应用程序.</span>
             </div>
-          </el-dialog>
+            <i class="el-icon-question" />
+          </el-tooltip></h3><br>
+          <el-switch
+            v-model="addData.commandSwitch"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            inactive-text="关"
+            active-text="开"
+          />
+          <div v-if="addData.commandSwitch">
+            <el-form-item label="COMMAND内容" prop="command_info">
+              <span slot="label">
+                <span slot="reference">COMMAND内容</span>
+                <el-tooltip placement="top">
+                  <div slot="content">
+                    <span>说明:</span><br>
+                    <span>例如: "/bin/sh"</span>
+                  </div>
+                  <i class="el-icon-question" />
+                </el-tooltip>
+              </span>
+              <el-input v-model="addData.commandInfo" />
+            </el-form-item>
+          </div><br>
+          <h3>ARGS开关 <el-tooltip placement="top">
+            <div slot="content">
+              <span>说明:</span><br>
+              <span>如果仅为容器定义了args字段,那么它将作为参数传递给镜像中默认指定运行的应用程序.</span>
+            </div>
+            <i class="el-icon-question" />
+          </el-tooltip></h3><br>
+          <el-switch
+            v-model="addData.argsSwitch"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            inactive-text="关"
+            active-text="开"
+          />
+          <div v-if="addData.argsSwitch">
+            <el-form-item label="ARGS内容" prop="args_info">
+              <span slot="label">
+                <span slot="reference">ARGS内容</span>
+                <el-tooltip placement="top">
+                  <div slot="content">
+                    <span>说明:</span><br>
+                    <span>多个参数间使用","分隔,例如: "-c","while true; do sleep 30; done"</span>
+                  </div>
+                  <i class="el-icon-question" />
+                </el-tooltip>
+              </span>
+              <el-input v-model="addData.argsInfo" />
+            </el-form-item>
+          </div>
+        </el-card>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+        <el-button type="primary" @click="createAppData()">确 定</el-button>
+      </div>
+    </el-dialog>
         </el-row>
         <el-table
           :data="tableData"
@@ -205,6 +396,43 @@ export default {
         subbusinessQuery: {
           businessId: this.businessId
         },
+        rules: {
+        container_port: [
+          { required: true, message: '请输入容器端口', trigger: 'blur' },
+          { required: true, pattern: /(^\d{2,5}$)/, message: '长度在 2 到 5 个数字', trigger: 'blur' }
+        ],
+        git_url: [
+          { required: true, message: '请输入git地址', trigger: 'blur' },
+          { required: true, pattern: /(^git@.\\:.\/.\.git$)/, message: '请输入正确的SSH格式的git地址', trigger: 'blur' }
+        ],
+        app_name: [
+          { required: true, message: '请输入应用名称', trigger: 'blur' }
+        ],
+        business_id: [
+          { required: true, message: '请选择对应主业务线信息', trigger: 'blur' }
+        ],
+        subbusiness_id: [
+          { required: true, message: '请选择对应次业务线信息', trigger: 'blur' }
+        ],
+        cpu_limit: [
+          { required: true, message: '请选择CPU限额', trigger: 'blur' }
+        ],
+        cpu_requests: [
+          { required: true, message: '请选择CPU需求', trigger: 'blur' }
+        ],
+        mem_limit: [
+          { required: true, message: '请选择内存限额', trigger: 'blur' }
+        ],
+        mem_requests: [
+          { required: true, message: '请选择内存需求', trigger: 'blur' }
+        ],
+        language: [
+          { required: true, message: '请选择应用开发语言', trigger: 'blur' }
+        ],
+        repository: [
+          { required: true, message: '请输入镜像地址', trigger: 'blur' }
+        ]
+      },
         formLabelWidth: '100px',
         dialogFormVisibleAdd: false,
         tableData: [],
@@ -221,9 +449,20 @@ export default {
           metricsSwitch:'' || false,
           namespaceId:null,
           readinessSwitch:'' || false,
+          pullPolicy: '' || 'IfNotPresent',
           subbusinessId:null,
           updateUser:null,
           usable:'' || true,
+          containerPort: '',
+          repository: '',
+          commandSwitch: '' || false,
+          argsSwitch: '' || false,
+          cpuLimit: '' || '1',
+          cpuRequests: '' || '1',
+          memLimit: '' || '1Gi',
+          memRequests: '' || '1Gi',
+          argsInfo: '',
+          commandInfo: '',
         },
         languages: [{
           value: 'python',
@@ -260,6 +499,9 @@ export default {
         this.subbusinessQuery.businessId = val
         this.getSubBusinessData()
       },
+      subbusinessId(val) {
+       console.log("二级业务线ID有变化: ",val); 
+      }, 
       nsvalue(val) {
         this.appListQuery.namespaceId = val
         this.appvalue = ''
@@ -315,37 +557,30 @@ export default {
         this.addData.createUser = this.userInfo.userName
         this.addData.updateUser = this.userInfo.userName
         this.addData.namespaceId = this.nsvalue
+        console.log("请求创建应用: ", this.addData);
         createApps(this.addData).then(res => {
           console.log(res.code);
           this.getAppsListData()
+          // this.resetAddData()
+          this.$notify({
+            title: '成功',
+            message: '创建应用成功,请进行应用配置~',
+            type: 'success'
+          })
         })
       }, 
       changeBusiness(_value) {
         this.businessId = _value
       },
       changeSubBusiness(_value) {
-        this.addData.subbusinessId = _value
+        this.subbusinessId = _value
       },
       changeApp(_value) {
         this.appvalue = _value
      
       },
       heanleInfo(val) {
-        console.log("当前应用ID1: ", this.currentAppId);
-        console.log("当前应用ID2: ", val);
-        // this.$router.push({
-        //   name: '/layout/myapp/appinfo',
-        //   params: {
-        //     ID: val
-        //   }
-        // })
-        // this.$store.dispatch('user/UpdateCurrentAppId',val)
         store.commit('user/setCurrentAppId',val)
-        store.
-        console.log("当前应用ID3: ", this.currentAppId) 
-        // this.current_app_id = val
-        // this.$store.dispatch('app/updateNsvalue', this.nsvalue)
-        // this.$store.dispatch('app/updateAppvalue', val)
       },
       handleSizeChange(val) {
         this.appListQuery.pageSize = val

@@ -78,12 +78,10 @@
 import {
     createAlias,
     deleteAlias,
-    deleteAliasByIds,
     updateAlias,
-    findAlias,
     getAliasListByAppId,
 } from "@/api/alias";  //  此处请自行替换地址
-import { mapGetters, mapMutations} from 'vuex'
+import { mapGetters } from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
 
 export default {
@@ -94,9 +92,7 @@ export default {
   data() {
     return {
       alias_list: [],
-      // dialogTableVisible: false,
       dialogFormVisible: false,
-      // dialogTableVisibleAdd: false,
       dialogFormVisibleAdd: false,
       formLabelWidth: '120px',
       visible: false,
@@ -152,9 +148,9 @@ export default {
     },
     deleteAliasData(id) {
       this.deleteData.id = id 
-      console.log("r1: ", this.deleteData)
-      console.log("r2: ", id)
+      
       deleteAlias(this.deleteData).then(res => {
+        console.log("staus: ", res.code)
         this.getAliasData()
         // this.deleteData.id = ''
         this.$notify({
@@ -176,6 +172,7 @@ export default {
       this.editData.appId = this.currentAppId
       this.dialogFormVisible = false
       updateAlias(this.editData).then(res => {
+        console.log("staus: ", res.code)
         this.resetEditData()
         this.getAliasData()
         this.$notify({
@@ -194,6 +191,7 @@ export default {
       this.addData.appId = this.currentAppId
       this.dialogFormVisibleAdd = false
       createAlias(this.addData).then(res => {
+        console.log("staus: ", res.code)
         this.resetAddData()
         this.getAliasData()
         this.$notify({
@@ -203,8 +201,7 @@ export default {
         })
       })
     },
-  }, 
-  
+  },  
 };
 </script>
 

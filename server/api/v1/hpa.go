@@ -97,7 +97,7 @@ func UpdateHpa(c *gin.Context) {
 func FindHpa(c *gin.Context) {
 	var hpa model.Hpa
 	_ = c.ShouldBindQuery(&hpa)
-	err, rehpa := service.GetHpa(hpa.ID)
+	err, rehpa := service.GetHpa(hpa.AppId)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {

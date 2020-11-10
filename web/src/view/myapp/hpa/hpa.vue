@@ -1,109 +1,125 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">          
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
+    <div v-if="currentAppId !== null">
+      
+         <el-switch
+            v-model="hpaSwitch"
+            style="display: block"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            inactive-text="关"
+            active-text="开"
+            @change="change_switch"
+          /><br>
+          <el-button type="primary" round @click="openEdit()">编辑信息</el-button><br>
+    <el-dialog append-to-body title="修改监控接入配置" :visible.sync="dialogFormVisible">
+      <el-form :model="editData">
+        <el-form-item :label-width="formLabelWidth">
         </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增hpa表</el-button>
+        <el-form-item label="最小副本数" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.minReplicas" :min="2" :max="10" @change="minHandleChange" />
         </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
+        <el-form-item label="最大副本数" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.maxReplicas" :min="2" :max="10" @change="maxHandleChange" />
+        </el-form-item>
+        <el-form-item label="CPU水位线" style="margin-bottom: 5px;">
+          <el-input-number v-model="editData.cpuTargetAverageUtilization" :min="50" :max="200" @change="cpuHandleChange" />
+        </el-form-item>
+        <el-form-item label="内存水位线" style="margin-bottom: 5px;">
+          <el-input
+            v-model="editData.memTargetAverageValue"
+            placeholder="例如: 2Gi"
+            clearable
+            style="width:200px"
+          />
+
         </el-form-item>
       </el-form>
-    </div>
-    <el-table
-      :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
-      style="width: 100%"
-      tooltip-effect="dark"
-    >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联应用id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="平均CPU扩展水位线" prop="cpuTargetAverageUtilization" width="120"></el-table-column> 
-    
-    <el-table-column label="最大副本数" prop="maxReplicas" width="120"></el-table-column> 
-    
-    <el-table-column label="平均内存扩展水位线" prop="memTargetAverageValue" width="120"></el-table-column> 
-    
-    <el-table-column label="最小副本数" prop="minReplicas" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
-        <template slot-scope="scope">
-          <el-button @click="updateHpa(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteHpa(scope.row)">确定</el-button>
-            </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editHpaData()">确 定</el-button>
       </div>
     </el-dialog>
-  </div>
+    <el-card>
+      <el-form
+        :model="hpa"
+      >
+        <el-form-item label="最小副本数" style="margin-bottom: 5px;">
+          <el-input-number v-model="hpa.minReplicas" :min="2" :max="10" disabled @change="minHandleChange" />
+        </el-form-item>
+        <el-form-item label="最大副本数" style="margin-bottom: 5px;">
+          <el-input-number v-model="hpa.maxReplicas" :min="2" :max="10" disabled @change="maxHandleChange" />
+        </el-form-item>
+        <el-form-item label="CPU水位线" style="margin-bottom: 5px;">
+          <el-input-number v-model="hpa.cpuTargetAverageUtilization" :min="50" :max="200" disabled @change="cpuHandleChange" />
+        </el-form-item>
+        <el-form-item label="内存水位线" style="margin-bottom: 5px;">
+          <el-input
+            v-model="hpa.memTargetAverageValue"
+            placeholder="例如: 2Gi"
+            clearable
+            style="width:200px"
+            disabled
+          />
+        </el-form-item>
+      </el-form>
+    </el-card>
+    </div>
 </template>
 
 <script>
 import {
-    createHpa,
-    deleteHpa,
-    deleteHpaByIds,
-    updateHpa,
-    findHpa,
-    getHpaList
+ updateHpa,
+ findHpa, 
 } from "@/api/hpa";  //  此处请自行替换地址
+import {
+  findApps,
+  updateAppsSwitch,
+} from '@/api/apps';
+import { mapGetters } from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
 
 export default {
   name: "Hpa",
   mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
+  beforeMount() {
+    this.getHpaData()
+    this.getSwitchData()
+  },
   data() {
     return {
-      listApi: getHpaList,
       dialogFormVisible: false,
+      dialogFormVisibleAdd: false,
+      formLabelWidth: '120px',
       visible: false,
       type: "",
       deleteVisible: false,
-      multipleSelection: [],formData: {
-        appId:null,cpuTargetAverageUtilization:null,maxReplicas:null,memTargetAverageValue:null,minReplicas:null,
+      switchQuery: {
+        ID: ''
+      },
+      query: {
+        appId: ''
+      },
+      hpa: {
+        minReplicas: '',
+        maxReplicas: '',
+        cpuTargetAverageUtilization: '',
+        memTargetAverageValue: ''
+      },
+      hpaSwitch: '',
+      editData: {
+        appId: '',
+        minReplicas: '' || 2,
+        maxReplicas: '' || 10,
+        cpuTargetAverageUtilization: '' || 70,
+        memTargetAverageValue: ''
+      },
+      switchData: {
+        ID: '',
+        hpaSwitch: ''
       }
     };
   },
@@ -125,91 +141,60 @@ export default {
     }
   },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10         
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteHpaByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateHpa(row) {
-      const res = await findHpa({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.rehpa;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          cpuTargetAverageUtilization:null,
-          maxReplicas:null,
-          memTargetAverageValue:null,
-          minReplicas:null,
-      };
-    },
-    async deleteHpa(row) {
-      this.visible = false;
-      const res = await deleteHpa({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createHpa(this.formData);
-          break;
-        case "update":
-          res = await updateHpa(this.formData);
-          break;
-        default:
-          res = await createHpa(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
+    change_switch(value) {
+      this.switchData.hpaSwitch = value
+      this.switchData.ID = this.currentAppId
+      updateAppsSwitch(this.switchData).then(res => {
+        console.log("staus: ", res.code)
+        this.getSwitchData()
+        this.$notify({
+          title: '成功',
+          message: '调整自动扩展开关完成.',
+          type: 'success'
         })
-        this.closeDialog();
-        this.getTableData();
-      }
+      })
     },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
+    getSwitchData() {
+      this.switchQuery.ID = this.currentAppId
+      findApps(this.switchQuery).then(res => {
+        this.hpaSwitch = res.data.reapps[0].hpaSwitch
+      })
+    },
+    getHpaData() {
+      this.query.appId = this.currentAppId
+      findHpa(this.query).then(res => {
+        this.hpa.minReplicas = res.data.rehpa.minReplicas
+        this.hpa.maxReplicas = res.data.rehpa.maxReplicas
+        this.hpa.cpuTargetAverageUtilization = res.data.rehpa.cpuTargetAverageUtilization
+        this.hpa.memTargetAverageValue = res.data.rehpa.memTargetAverageValue
+      })
+    },
+    openEdit() {
+      this.editData.appId = this.currentAppId
+      this.dialogFormVisible = true
+    },
+    editHpaData() {
+      updateHpa(this.editData).then(res => {
+        this.getHpaData()
+        this.dialogFormVisible = false
+        this.$notify({
+          title: '成功',
+          message: '编辑动态扩展信息完成.',
+          type: 'success'
+        })
+      })
+    },
+    minHandleChange(value) {
+      this.editData.minReplicas = value
+    },
+    maxHandleChange(value) {
+      this.editData.maxReplicas = value
+    },
+    cpuHandleChange(value) {
+      this.editData.maxReplicas = value
+    },
   },
-  async created() {
-    await this.getTableData();}
-};
+}
 </script>
 
 <style>

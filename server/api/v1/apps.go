@@ -19,10 +19,12 @@ import (
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /apps/createApps [post]
 func CreateApps(c *gin.Context) {
-	var apps model.Apps
+	var apps request.AppsSearch
 	_ = c.ShouldBindJSON(&apps)
-	err := service.CreateApps(apps)
-	if err != nil {
+	err,appId := service.CreateApps(model.Apps{AppName: apps.AppName,BusinessId: apps.BusinessId, CreateUser: apps.CreateUser, CurrentEnv: apps.CurrentEnv, GatewaySwitch: apps.GatewaySwitch, GitUrl: apps.GitUrl, HpaSwitch: apps.HpaSwitch,Language: apps.Language, LivenessSwitch: apps.LivenessSwitch, MetricsSwitch: apps.MetricsSwitch, NamespaceId: apps.NamespaceId,ReadinessSwitch: apps.ReadinessSwitch,SubbusinessId: apps.SubbusinessId,UpdateUser: apps.UpdateUser,})
+	fmt.Printf("......%v\n\n...%v\n\n", apps.Repository,apps.CommandInfo)
+	_ = service.CreateDeploy(model.Deploy{AppId: appId, ArgsSwitch: apps.ArgsSwitch, ArgsInfo: apps.ArgsInfo, CommandInfo: apps.CommandInfo, CommandSwitch: apps.CommandSwitch, ContainerPort: apps.ContainerPort, PullPolicy: apps.PullPolicy, Repository: apps.Repository})
+	if err != nil  {
 		response.FailWithMessage(fmt.Sprintf("创建失败，%v", err), c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -79,6 +81,17 @@ func UpdateApps(c *gin.Context) {
 	var apps model.Apps
 	_ = c.ShouldBindJSON(&apps)
 	err := service.UpdateApps(&apps)
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("更新失败，%v", err), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
+	}
+}
+
+func UpdateAppsSwitch(c *gin.Context) {
+	var apps model.Apps
+	_ = c.ShouldBindJSON(&apps)
+	err := service.UpdateAppsSwitch(&apps)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("更新失败，%v", err), c)
 	} else {

@@ -1,110 +1,171 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">          
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增gateway表</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
-        </el-form-item>
-      </el-form>
-    </div>
+    <div v-if="currentAppId !== null">
+      <el-switch
+      v-model="gatewaySwitch"
+      style="display: block"
+      active-color="#13ce66"
+      inactive-color="#ff4949"
+      inactive-text="关"
+      active-text="开"
+      @change="change_gateway_switch"
+    />
+    <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
+      <el-button type="primary" :disabled="!gatewaySwitch" round @click="dialogFormVisibleAdd = true">添加域名</el-button>
+      <el-dialog append-to-body title="添加域名" :visible.sync="dialogFormVisibleAdd">
+        <el-form :model="addData">
+          <el-form-item label="域名" :label-width="formLabelWidth">
+            <el-input v-model="addData.hosts" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="路径" :label-width="formLabelWidth">
+            <el-input v-model="addData.paths" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="ONLINE权重" :label-width="formLabelWidth">
+            <el-input-number v-model="addData.weightOnline" :min="0" :max="100" @change="weight_online_HandleChange" />
+          </el-form-item>
+          <el-form-item label="CANARY权重" :label-width="formLabelWidth">
+            <el-input-number v-model="addData.weightCanary" :min="0" :max="100" @change="weight_canary_HandleChange" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+          <el-button type="primary" @click="addGatewayData()">确 定</el-button>
+        </div>
+      </el-dialog>
+    </el-row>
     <el-table
       :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
-      stripe
       style="width: 100%"
-      tooltip-effect="dark"
     >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联应用id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="域名信息" prop="hosts" width="120"></el-table-column> 
-    
-    <el-table-column label="域名对应启用路径" prop="paths" width="120"></el-table-column> 
-    
-    <el-table-column label="canary流量权重" prop="weightCanary" width="120"></el-table-column> 
-    
-    <el-table-column label="online流量权重" prop="weightOnline" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
+      <el-table-column
+        prop="hosts"
+        label="域名"
+        align="center"
+      />
+      <el-table-column
+        prop="paths"
+        label="路径"
+        align="center"
+      />
+      <el-table-column
+        prop="weightOnline"
+        label="ONLINE权重"
+        align="center"
+      />
+      <el-table-column
+        prop="weightCanary"
+        label="CANARY权重"
+        align="center"
+      />
+      <el-table-column
+        fixed="right"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button @click="updateGateway(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteGateway(scope.row)">确定</el-button>
+          <template>
+            <el-popconfirm
+              confirm-button-text="好的"
+              cancel-button-text="不用了"
+              icon="el-icon-info"
+              icon-color="red"
+              :title="`确认要删除域名 ${scope.row.hosts} 下路径 ${scope.row.paths} 的配置?`"
+              @confirm="deleteGatewayData(ID=scope.row.ID)"
+            >
+              <el-button slot="reference" type="danger" :disabled="!gatewaySwitch" icon="el-icon-delete" circle />
+            </el-popconfirm>
+          </template>
+
+          <el-button icon="el-icon-edit" :disabled="!gatewaySwitch" type="primary" circle @click="openEdit(ID=scope.row.ID,hosts=scope.row.hosts,paths=scope.row.paths, weightOnline=scope.row.weightOnline, weightCanary=scope.row.weightCanary)" />
+
+          <el-dialog append-to-body title="修改配置" :visible.sync="dialogFormVisible">
+            <el-form :model="editData">
+              <el-form-item label="HOST" :label-width="formLabelWidth">
+                <el-input v-model="editData.hosts" disabled autocomplete="off" />
+              </el-form-item>
+              <el-form-item label="PATH" :label-width="formLabelWidth">
+                <el-input v-model="editData.paths" autocomplete="off" />
+              </el-form-item>
+              <el-form-item label="ONLINE权重" :label-width="formLabelWidth">
+                <el-input-number v-model="editData.weightOnline" :min="0" :max="100" @change="weight_online_HandleChange" />
+              </el-form-item>
+              <el-form-item label="CANARY权重" :label-width="formLabelWidth">
+                <el-input-number v-model="editData.weightCanary" :min="0" :max="100" @change="weight_canary_HandleChange" />
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="editGatewayData()">确 定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
+          </el-dialog>
+
         </template>
       </el-table-column>
     </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
-    </el-dialog>
-  </div>
+    </div>
 </template>
 
 <script>
 import {
-    createGateway,
-    deleteGateway,
-    deleteGatewayByIds,
-    updateGateway,
-    findGateway,
-    getGatewayList
+ updateGateway,
+ getGatewayList,
+ deleteGateway,
+ createGateway,
 } from "@/api/gateway";  //  此处请自行替换地址
+import {
+  findApps,
+  updateAppsSwitch,
+} from '@/api/apps';
+import { mapGetters } from 'vuex'
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
 
 export default {
   name: "Gateway",
   mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
+  beforeMount() {
+    this.getGatewayData()
+    this.getSwitchData()
+  },
   data() {
     return {
-      listApi: getGatewayList,
       dialogFormVisible: false,
+      dialogFormVisibleAdd: false,
+      formLabelWidth: '120px',
       visible: false,
       type: "",
       deleteVisible: false,
-      multipleSelection: [],formData: {
-        appId:null,hosts:null,paths:null,weightCanary:null,weightOnline:null,
-      }
+      switchQuery: {
+        ID: ''
+      },
+      gatewaySwitch: '',
+      query: {
+        appId: ''
+      },
+      deleteData: {
+        ID:'',
+      },
+      addData: {
+        appId: '',
+        weightCanary: '',
+        weightOnline: '',
+        hosts: '',
+        paths: ''
+      },
+      editData: {
+        appId: '',
+        ID: '',
+        weightCanary: '',
+        weightOnline: '',
+        hosts: '',
+        paths: ''
+      },
+      switchData: {
+        ID: '',
+        gatewaySwitch: ''
+      },
     };
   },
   filters: {
@@ -125,91 +186,104 @@ export default {
     }
   },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10         
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteGatewayByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateGateway(row) {
-      const res = await findGateway({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.regateway;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          hosts:null,
-          paths:null,
-          weightCanary:null,
-          weightOnline:null,
-      };
-    },
-    async deleteGateway(row) {
-      this.visible = false;
-      const res = await deleteGateway({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createGateway(this.formData);
-          break;
-        case "update":
-          res = await updateGateway(this.formData);
-          break;
-        default:
-          res = await createGateway(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
+    change_gateway_switch(value) {
+      this.switchData.gatewaySwitch = value
+      this.switchData.ID = this.currentAppId
+      updateAppsSwitch(this.switchData).then(res => {
+        console.log("staus: ", res.code)
+        this.getSwitchData()
+        this.$notify({
+          title: '成功',
+          message: '调整域名开关完成.',
+          type: 'success'
         })
-        this.closeDialog();
-        this.getTableData();
-      }
+      })
     },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
-  },
-  async created() {
-    await this.getTableData();}
-};
+    getSwitchData() {
+      this.switchQuery.ID = this.currentAppId
+      findApps(this.switchQuery).then(res => {
+        this.gatewaySwitch = res.data.reapps[0].gatewaySwitch
+      })
+    },
+    getGatewayData() {
+      this.query.appId = this.currentAppId
+      getGatewayList(this.query).then(res => {
+        this.tableData = res.data.list
+      })
+    },
+    openEdit(ID,hosts, paths, weightOnline, weightCanary) {
+      this.editData.ID = ID
+      this.editData.appId = this.currentAppId
+      this.dialogFormVisible = true
+      this.editData.hosts = hosts
+      this.editData.paths = paths
+      this.editData.weightOnline = weightOnline
+      this.editData.weightCanary = weightCanary
+    },
+    resetGatewayData() {
+      this.editData.ID = ''
+      this.editData.hosts = ''
+      this.editData.paths = ''
+      this.editData.weightOnline = ''
+      this.editData.weightCanary = ''
+    },
+    resetAddData() {
+      this.addData.hosts = ''
+      this.addData.paths = ''
+      this.addData.weightCanary = ''
+      this.addData.weightOnline = ''
+    },
+    addGatewayData() {
+      this.dialogFormVisibleAdd = false
+      this.addData.appId = this.currentAppId
+      createGateway(this.addData).then(res => {
+        console.log("staus: ", res.code)
+        this.getGatewayData()
+        this.resetAddData()
+        this.$notify({
+          title: '成功',
+          message: '添加域名完成.',
+          type: 'success'
+        })
+      })
+    },
+    editGatewayData() {
+      this.editData.appId = this.currentAppId
+      this.dialogFormVisible = false
+      updateGateway(this.editData).then(res => {
+        console.log("staus: ", res.code)
+        this.resetGatewayData()
+        this.getGatewayData()
+        this.$notify({
+          title: '成功',
+          message: '编辑域名完成.',
+          type: 'success'
+        })
+      })
+    },
+    weight_canary_HandleChange(value) {
+      this.editData.weightOnline = 100-value
+      this.addData.weightOnline = 100-value  
+    },
+    weight_online_HandleChange(value) {
+      this.editData.weightCanary = 100-value 
+      this.addData.weightCanary = 100-value 
+    },
+    deleteGatewayData(ID) {
+      this.deleteData.ID = ID
+      console.log("......",this.deleteData)
+      deleteGateway(this.deleteData).then(res => {
+        console.log("staus: ", res.code)
+        this.getGatewayData()
+        this.$notify({
+          title: '成功',
+          message: '删除域名下路径配置完成.',
+          type: 'success'
+        })
+      })
+    },
+  }
+}
 </script>
 
 <style>

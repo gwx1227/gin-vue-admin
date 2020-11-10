@@ -46,7 +46,7 @@ func DeleteLivenessByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateLiveness(liveness *model.Liveness) (err error) {
-	err = global.GVA_DB.Save(liveness).Error
+	err = global.GVA_DB.Debug().Where("app_id = ? ", liveness.AppId).Updates(liveness).Error
 	return err
 }
 
@@ -57,8 +57,8 @@ func UpdateLiveness(liveness *model.Liveness) (err error) {
 // @return                    error
 // @return    Liveness        Liveness
 
-func GetLiveness(id uint) (err error, liveness model.Liveness) {
-	err = global.GVA_DB.Where("id = ?", id).First(&liveness).Error
+func GetLiveness(appId uint) (err error, liveness model.Liveness) {
+	err = global.GVA_DB.Debug().Where("app_id = ?", appId).First(&liveness).Error
 	return
 }
 

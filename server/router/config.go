@@ -15,5 +15,6 @@ func InitConfigRouter(Router *gin.RouterGroup) {
 		ConfigRouter.PUT("updateConfig", v1.UpdateConfig)              // 更新Config
 		ConfigRouter.GET("findConfig", v1.FindConfig)                  // 根据ID获取Config
 		ConfigRouter.GET("getConfigList", v1.GetConfigList)            // 获取Config列表
+		ConfigRouter.GET("getConfigListByAppId", v1.GetConfigListByAppId)            // 根据应用ID获取Config列表
 	}
 }

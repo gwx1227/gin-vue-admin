@@ -8,7 +8,7 @@ import (
 // 如果含有time.Time 请自行import time包
 type Deploy struct {
 	gorm.Model
-	AppId              int    `json:"appId" form:"appId" gorm:"column:app_id;uniqueIndex;not null;comment:关联应用id"`
+	AppId              uint    `json:"appId" form:"appId" gorm:"column:app_id;uniqueIndex;not null;comment:关联应用id"`
 	ArgsInfo           string `json:"argsInfo" form:"argsInfo" gorm:"column:args_info;comment:args内容"`
 	ArgsSwitch         *bool  `json:"argsSwitch" form:"argsSwitch" gorm:"column:args_switch;not null;default:false;comment:是否开启args"`
 	CommandInfo        string `json:"commandInfo" form:"commandInfo" gorm:"column:command_info;comment:command内容"`
@@ -20,8 +20,8 @@ type Deploy struct {
 	Repository         string `json:"repository" form:"repository" gorm:"column:repository;not null;comment:docker镜像地址"`
 	TagCanary          string `json:"tagCanary" form:"tagCanary" gorm:"column:tag_canary;comment:canary代码版本"`
 	TagOnline          string `json:"tagOnline" form:"tagOnline" gorm:"column:tag_online;comment:online代码版本"`
-	WeigitCanary       int    `json:"weigitCanary" form:"weigitCanary" gorm:"column:weigit_canary;not null;default:0;comment:canary流量权重"`
-	WeigitOnline       int    `json:"weigitOnline" form:"weigitOnline" gorm:"column:weigit_online;not null;default:100;comment:online流量权重"`
+	WeightCanary       int    `json:"weightCanary" form:"weightCanary" gorm:"column:weight_canary;not null;default:0;comment:canary流量权重"`
+	WeightOnline       int    `json:"weightOnline" form:"weightOnline" gorm:"column:weight_online;not null;default:100;comment:online流量权重"`
 }
 
 func (Deploy) TableName() string {

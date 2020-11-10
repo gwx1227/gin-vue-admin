@@ -14,6 +14,7 @@ func InitDeployRouter(Router *gin.RouterGroup) {
 		DeployRouter.DELETE("deleteDeployByIds", v1.DeleteDeployByIds) // 批量删除Deploy
 		DeployRouter.PUT("updateDeploy", v1.UpdateDeploy)              // 更新Deploy
 		DeployRouter.GET("findDeploy", v1.FindDeploy)                  // 根据ID获取Deploy
+		DeployRouter.GET("findDeployByAppId", v1.FindDeployByAppId)                  // 根据ID获取Deploy
 		DeployRouter.GET("getDeployList", v1.GetDeployList)            // 获取Deploy列表
 	}
 }

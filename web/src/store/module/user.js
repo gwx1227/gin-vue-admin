@@ -76,7 +76,7 @@ export const user = {
             return state.token
         },
         currentAppId(state) {
-            console.log("获取应用I2D: ",state.currentAppId); 
+            console.log("获取应用ID: ",state.currentAppId); 
             return state.currentAppId
         },
 

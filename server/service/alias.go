@@ -13,7 +13,7 @@ import (
 // @return    err             error
 
 func CreateAlias(alias model.Alias) (err error) {
-	err = global.GVA_DB.Create(&alias).Error
+	err = global.GVA_DB.Debug().Create(&alias).Error
 	return err
 }
 

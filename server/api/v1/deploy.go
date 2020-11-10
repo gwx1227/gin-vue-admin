@@ -105,6 +105,17 @@ func FindDeploy(c *gin.Context) {
 	}
 }
 
+func FindDeployByAppId(c *gin.Context) {
+	var deploy model.Deploy
+	_ = c.ShouldBindQuery(&deploy)
+	err, redeploy := service.GetDeployByAppId(deploy.AppId)
+	if err != nil {
+		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
+	} else {
+		response.OkWithData(gin.H{"redeploy": redeploy}, c)
+	}
+}
+
 // @Tags Deploy
 // @Summary 分页获取Deploy列表
 // @Security ApiKeyAuth

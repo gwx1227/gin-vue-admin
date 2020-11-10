@@ -1,208 +1,190 @@
 <template>
-  <div>
-    <div class="search-term">
-      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">      
-        <el-form-item>
-          <el-button @click="onSubmit" type="primary">查询</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button @click="openDialog" type="primary">新增config表</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-popover placement="top" v-model="deleteVisible" width="160">
-            <p>确定要删除吗？</p>
-              <div style="text-align: right; margin: 0">
-                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
-                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
-              </div>
-            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
-          </el-popover>
-        </el-form-item>
-      </el-form>
-    </div>
+    <div v-if="currentAppId !== null">
+      <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
+      <el-button type="primary" round @click="dialogFormVisibleAdd = true">添加配置</el-button>
+      <el-dialog append-to-body title="添加配置" :visible.sync="dialogFormVisibleAdd">
+        <el-form :model="addData">
+          <el-form-item label="KEY" :label-width="formLabelWidth">
+            <el-input v-model="addData.key" autocomplete="off" />
+          </el-form-item>
+          <el-form-item label="VALUE" :label-width="formLabelWidth">
+            <el-input v-model="addData.value" autocomplete="off" />
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+          <el-button type="primary" @click="addConfigData()">确 定</el-button>
+        </div>
+      </el-dialog>
+    </el-row>
     <el-table
       :data="tableData"
-      @selection-change="handleSelectionChange"
-      border
-      ref="multipleTable"
       stripe
-      style="width: 100%"
-      tooltip-effect="dark"
+      align="center"
     >
-    <el-table-column type="selection" width="55"></el-table-column>
-    <el-table-column label="日期" width="180">
-         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
-    </el-table-column>
-    
-    <el-table-column label="关联app_id" prop="appId" width="120"></el-table-column> 
-    
-    <el-table-column label="配置KEY" prop="key" width="120"></el-table-column> 
-    
-    <el-table-column label="配置VALUE" prop="value" width="120"></el-table-column> 
-    
-      <el-table-column label="按钮组">
+      <el-table-column
+        prop="key"
+        label="配置项"
+        align="center"
+      />
+      <el-table-column
+        prop="value"
+        label="配置值"
+        align="center"
+      />
+      <el-table-column
+        fixed="right"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button @click="updateConfig(scope.row)" size="small" type="primary">变更</el-button>
-          <el-popover placement="top" width="160" v-model="scope.row.visible">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-              <el-button type="primary" size="mini" @click="deleteConfig(scope.row)">确定</el-button>
+          <template>
+            <el-popconfirm
+              confirm-button-text="好的"
+              cancel-button-text="不用了"
+              icon="el-icon-info"
+              icon-color="red"
+              :title="`确认要删除配置 ${scope.row.key} ?`"
+              @confirm="deleteConfigData(id=scope.row.ID)"
+            >
+              <el-button slot="reference" type="danger" icon="el-icon-delete" circle />
+            </el-popconfirm>
+          </template>
+
+          <el-button icon="el-icon-edit" type="primary" circle @click="openEdit(id=scope.row.ID,key=scope.row.key,value=scope.row.value)" />
+
+          <el-dialog append-to-body title="修改配置" :visible.sync="dialogFormVisible">
+            <el-form :model="editData">
+              <el-form-item label="KEY" :label-width="formLabelWidth">
+                <el-input v-model="editData.key" disabled autocomplete="off" />
+              </el-form-item>
+              <el-form-item label="VALUE" :label-width="formLabelWidth">
+                <el-input v-model="editData.value" autocomplete="off" />
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="editConfigData()">确 定</el-button>
             </div>
-            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
-          </el-popover>
+          </el-dialog>
+
         </template>
       </el-table-column>
     </el-table>
-
-    <el-pagination
-      :current-page="page"
-      :page-size="pageSize"
-      :page-sizes="[10, 30, 50, 100]"
-      :style="{float:'right',padding:'20px'}"
-      :total="total"
-      @current-change="handleCurrentChange"
-      @size-change="handleSizeChange"
-      layout="total, sizes, prev, pager, next, jumper"
-    ></el-pagination>
-
-    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
-      此处请使用表单生成器生成form填充 表单默认绑定 formData 如手动修改过请自行修改key
-      <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
-      </div>
-    </el-dialog>
-  </div>
+    </div>
 </template>
 
 <script>
 import {
     createConfig,
     deleteConfig,
-    deleteConfigByIds,
     updateConfig,
-    findConfig,
-    getConfigList
+    getConfigListByAppId,
 } from "@/api/config";  //  此处请自行替换地址
-import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
-
+import { mapGetters } from 'vuex'
 export default {
   name: "Config",
   mixins: [infoList],
+  computed: {
+    ...mapGetters('user', ['userInfo','currentAppId']),
+  },
   data() {
     return {
-      listApi: getConfigList,
+     visible: false,
+      tableData: [],
       dialogFormVisible: false,
-      visible: false,
-      type: "",
-      deleteVisible: false,
-      multipleSelection: [],formData: {
-        appId:null,key:null,value:null,
-      }
-    };
+      dialogFormVisibleAdd: false,
+      formLabelWidth: '120px',
+      query: {
+        appId: ''
+      },
+      deleteData: {
+        id: '',
+      },
+      addData: {
+        app_id: '',
+        key: '',
+        value: ''
+      },
+      editData: {
+        appId: '',
+        id: '',
+        key: '',
+        value: ''
+      },
+      };
   },
-  filters: {
-    formatDate: function(time) {
-      if (time != null && time != "") {
-        var date = new Date(time);
-        return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
-      } else {
-        return "";
-      }
-    },
-    formatBoolean: function(bool) {
-      if (bool != null) {
-        return bool ? "是" :"否";
-      } else {
-        return "";
-      }
-    }
+  beforeMount() {
+    this.getConfigData()
   },
   methods: {
-      //条件搜索前端看此方法
-      onSubmit() {
-        this.page = 1
-        this.pageSize = 10       
-        this.getTableData()
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val
-      },
-      async onDelete() {
-        const ids = []
-        this.multipleSelection &&
-          this.multipleSelection.map(item => {
-            ids.push(item.ID)
-          })
-        const res = await deleteConfigByIds({ ids })
-        if (res.code == 0) {
-          this.$message({
-            type: 'success',
-            message: '删除成功'
-          })
-          this.deleteVisible = false
-          this.getTableData()
-        }
-      },
-    async updateConfig(row) {
-      const res = await findConfig({ ID: row.ID });
-      this.type = "update";
-      if (res.code == 0) {
-        this.formData = res.data.reconfig;
-        this.dialogFormVisible = true;
-      }
-    },
-    closeDialog() {
-      this.dialogFormVisible = false;
-      this.formData = {
-        
-          appId:null,
-          key:null,
-          value:null,
-      };
-    },
-    async deleteConfig(row) {
-      this.visible = false;
-      const res = await deleteConfig({ ID: row.ID });
-      if (res.code == 0) {
-        this.$message({
-          type: "success",
-          message: "删除成功"
-        });
-        this.getTableData();
-      }
-    },
-    async enterDialog() {
-      let res;
-      switch (this.type) {
-        case "create":
-          res = await createConfig(this.formData);
-          break;
-        case "update":
-          res = await updateConfig(this.formData);
-          break;
-        default:
-          res = await createConfig(this.formData);
-          break;
-      }
-      if (res.code == 0) {
-        this.$message({
-          type:"success",
-          message:"创建/更改成功"
+    getConfigData() { 
+        this.query.appId = this.currentAppId
+        getConfigListByAppId(this.query).then(res => {
+        this.tableData = res.data.list
         })
-        this.closeDialog();
-        this.getTableData();
-      }
     },
-    openDialog() {
-      this.type = "create";
-      this.dialogFormVisible = true;
-    }
-  },
-  async created() {
-    await this.getTableData();}
+    openEdit(id, key, value) {
+      this.dialogFormVisible = true
+      this.editData.id = id
+      this.editData.key = key
+      this.editData.value = value
+    },
+    editConfigData() {
+      this.dialogFormVisible = false
+      this.editData.appId = this.currentAppId
+      console.log("..",this.editData); 
+      updateConfig(this.editData).then(res => {
+        console.log("staus: ", res.code)
+        this.resetEditData()
+        this.getConfigData()
+        this.$notify({
+          title: '成功',
+          message: '编辑配置项完成.',
+          type: 'success'
+        })
+      })
+    }, 
+    deleteConfigData(id) {
+      this.deleteData.id = id   
+      console.log(this.deleteData)
+      deleteConfig(this.deleteData).then(res => {
+        console.log("staus: ", res.code)
+        this.getConfigData()
+        this.$notify({
+          title: '成功',
+          message: '删除配置项完成.',
+          type: 'success'
+        })
+      })
+    },
+    resetAddData() {
+      this.addData.appId = ''
+      this.addData.key = ''
+      this.addData.value = ''
+    },
+    resetEditData() {
+      this.editData.id = ''
+      this.editData.key = ''
+      this.editData.value = ''
+    },
+    addConfigData() {
+      this.dialogFormVisibleAdd = false
+      this.addData.appId = this.currentAppId
+      console.log('ADD DATA : ', this.addData)
+      createConfig(this.addData).then(res => {
+        console.log("staus: ", res.code)
+        this.resetAddData()
+        this.getConfigData() 
+        this.$notify({
+          title: '成功',
+          message: '添加配置项完成.',
+          type: 'success'
+        })
+      })
+    },
+  }
 };
 </script>
 

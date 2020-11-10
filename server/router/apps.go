@@ -13,6 +13,7 @@ func InitAppsRouter(Router *gin.RouterGroup) {
 		AppsRouter.DELETE("deleteApps", v1.DeleteApps)           // 删除Apps
 		AppsRouter.DELETE("deleteAppsByIds", v1.DeleteAppsByIds) // 批量删除Apps
 		AppsRouter.PUT("updateApps", v1.UpdateApps)              // 更新Apps
+		AppsRouter.PUT("updateAppsSwitch", v1.UpdateAppsSwitch)              // 更新Apps配置开关
 		AppsRouter.GET("findApps", v1.FindApps)                  // 根据ID获取Apps
 		AppsRouter.GET("getAppsList", v1.GetAppsList)            // 获取Apps列表
 		AppsRouter.GET("getAppsListByNamespaceId", v1.GetAppsListByNamespaceId)            // 根据命令空间ID获取Apps列表

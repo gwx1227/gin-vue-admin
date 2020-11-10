@@ -98,3 +98,11 @@ export const createConfig = (data) => {
          params
      })
  }
+
+ export const getConfigListByAppId = (params) => {
+     return service({
+         url: "/config/getConfigListByAppId",
+         method: 'get',
+         params
+     })
+ } 

@@ -13,7 +13,7 @@ import (
 // @return    err             error
 
 func CreateDeploy(deploy model.Deploy) (err error) {
-	err = global.GVA_DB.Create(&deploy).Error
+	err = global.GVA_DB.Debug().Create(&deploy).Error
 	return err
 }
 
@@ -46,7 +46,7 @@ func DeleteDeployByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateDeploy(deploy *model.Deploy) (err error) {
-	err = global.GVA_DB.Save(deploy).Error
+	err = global.GVA_DB.Debug().Where("app_id = ?", deploy.AppId).Updates(deploy).Error
 	return err
 }
 
@@ -62,6 +62,10 @@ func GetDeploy(id uint) (err error, deploy model.Deploy) {
 	return
 }
 
+func GetDeployByAppId(app_id uint) (err error, deploy model.Deploy) {
+	err = global.GVA_DB.Debug().Where("app_id = ?", app_id).First(&deploy).Error
+	return
+}
 // @title    GetDeployInfoList
 // @description   get Deploy list by pagination, 分页获取Deploy
 // @auth                     （2020/04/05  20:22）

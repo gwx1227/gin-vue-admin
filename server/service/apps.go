@@ -13,9 +13,10 @@ import (
 // @auth                     （2020/04/05  20:22）
 // @return    err             error
 
-func CreateApps(apps model.Apps) (err error) {
-	err = global.GVA_DB.Create(&apps).Error
-	return err
+func CreateApps(apps model.Apps) (err error,appId uint) {
+	err = global.GVA_DB.Debug().Create(&apps).Error
+	appId = apps.ID
+	return err,appId
 }
 
 // @title    DeleteApps
@@ -48,6 +49,11 @@ func DeleteAppsByIds(ids request.IdsReq) (err error) {
 
 func UpdateApps(apps *model.Apps) (err error) {
 	err = global.GVA_DB.Save(apps).Error
+	return err
+}
+
+func UpdateAppsSwitch(apps *model.Apps) (err error) {
+	err = global.GVA_DB.Debug().Where("id = ? ", apps.ID).Updates(apps).Error
 	return err
 }
 

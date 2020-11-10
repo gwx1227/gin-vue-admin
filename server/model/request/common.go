@@ -14,3 +14,13 @@ type GetById struct {
 type IdsReq struct {
 	Ids []int `json:"ids" form:"ids"`
 }
+
+type CreateApp struct {
+	ArgsInfo           string `json:"argsInfo"`
+	ArgsSwitch         *bool  `json:"argsSwitch"`
+	CommandInfo        string `json:"commandInfo" form:"commandInfo"`
+	CommandSwitch      *bool  `json:"commandSwitch"`
+	ContainerPort      int    `json:"containerPort"`
+	PullPolicy         string `json:"pullPolicy"`
+	Repository         string `json:"repository"`
+}

@@ -46,7 +46,7 @@ func DeleteHpaByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateHpa(hpa *model.Hpa) (err error) {
-	err = global.GVA_DB.Save(hpa).Error
+	err = global.GVA_DB.Debug().Where("app_id = ? ", hpa.AppId).Updates(hpa).Error
 	return err
 }
 
@@ -57,8 +57,8 @@ func UpdateHpa(hpa *model.Hpa) (err error) {
 // @return                    error
 // @return    Hpa        Hpa
 
-func GetHpa(id uint) (err error, hpa model.Hpa) {
-	err = global.GVA_DB.Where("id = ?", id).First(&hpa).Error
+func GetHpa(appId uint) (err error, hpa model.Hpa) {
+	err = global.GVA_DB.Debug().Where("app_id = ?", appId).First(&hpa).Error
 	return
 }
 

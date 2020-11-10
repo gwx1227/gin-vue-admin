@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
@@ -13,6 +14,9 @@ import (
 // @return    err             error
 
 func CreateGateway(gateway model.Gateway) (err error) {
+	if gateway.WeightCanary + gateway.WeightOnline != 100 {
+		err = errors.New("权重和应为100,请核实!")
+	}
 	err = global.GVA_DB.Create(&gateway).Error
 	return err
 }
@@ -24,7 +28,7 @@ func CreateGateway(gateway model.Gateway) (err error) {
 // @return                    error
 
 func DeleteGateway(gateway model.Gateway) (err error) {
-	err = global.GVA_DB.Delete(gateway).Error
+	err = global.GVA_DB.Debug().Delete(gateway).Error
 	return err
 }
 
@@ -46,7 +50,10 @@ func DeleteGatewayByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateGateway(gateway *model.Gateway) (err error) {
-	err = global.GVA_DB.Save(gateway).Error
+	if gateway.WeightCanary + gateway.WeightOnline != 100 {
+		err = errors.New("权重和应为100,请核实!")
+	}
+	err = global.GVA_DB.Debug().Where("app_id = ? and id = ?", gateway.AppId, gateway.ID).Updates(gateway).Error
 	return err
 }
 
@@ -58,7 +65,7 @@ func UpdateGateway(gateway *model.Gateway) (err error) {
 // @return    Gateway        Gateway
 
 func GetGateway(id uint) (err error, gateway model.Gateway) {
-	err = global.GVA_DB.Where("id = ?", id).First(&gateway).Error
+	err = global.GVA_DB.Debug().Where("id = ?", id).First(&gateway).Error
 	return
 }
 
@@ -75,7 +82,7 @@ func GetGatewayInfoList(info request.GatewaySearch) (err error, list interface{}
 	db := global.GVA_DB.Model(&model.Gateway{})
 	var gateways []model.Gateway
 	// 如果有条件搜索 下方会自动创建搜索语句
-	err = db.Count(&total).Error
-	err = db.Limit(limit).Offset(offset).Find(&gateways).Error
+	err = db.Debug().Where("app_id = ?", info.AppId).Count(&total).Error
+	err = db.Debug().Where("app_id = ?", info.AppId).Limit(limit).Offset(offset).Find(&gateways).Error
 	return err, gateways, total
 }
