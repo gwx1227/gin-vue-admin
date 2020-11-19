@@ -20,7 +20,11 @@ type CreateApp struct {
 	ArgsSwitch         *bool  `json:"argsSwitch"`
 	CommandInfo        string `json:"commandInfo" form:"commandInfo"`
 	CommandSwitch      *bool  `json:"commandSwitch"`
-	ContainerPort      int    `json:"containerPort"`
+	ContainerPort      string    `json:"containerPort"`
 	PullPolicy         string `json:"pullPolicy"`
 	Repository         string `json:"repository"`
+	CpuLimit    string `json:"cpuLimit"`
+	CpuRequests string `json:"cpuRequests"`
+	MemLimit    string `json:"memLimit"`
+	MemRequests string `json:"memRequests"`
 }

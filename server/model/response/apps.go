@@ -8,4 +8,9 @@ type AppInfo struct {
 	Business
 }
 
+type AppInfoNamespacs struct {
+	model.Apps
+	Namespace   string `json:"namespace"`
+}
+
 

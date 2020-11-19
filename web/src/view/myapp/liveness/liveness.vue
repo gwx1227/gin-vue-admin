@@ -9,7 +9,8 @@
             active-text="开"
             @change="change_switch"
           /><br>
-       <el-button type="primary" round @click="openEdit()">编辑信息</el-button>
+           <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
+       <el-button type="primary" round @click="openEdit()">调整健康检查参数</el-button>
     <el-dialog append-to-body title="修改健康检查配置" :visible.sync="dialogFormVisible">
       <el-form :model="editData">
         <el-form-item :label-width="formLabelWidth">
@@ -44,6 +45,7 @@
         <el-button type="primary" @click="editLivenessData()">确 定</el-button>
       </div>
     </el-dialog>
+           </el-row>
     <el-card>
       <el-form
         :model="liveness"
@@ -194,6 +196,7 @@ export default {
     editLivenessData() {
       console.log('editData:', this.editData)
       updateLiveness(this.editData).then(res => {
+        console.log("staus: ", res.code)
         this.getLivenessData()
         this.dialogFormVisible = false
         this.$notify({

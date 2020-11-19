@@ -1,0 +1,5 @@
+apiVersion: v2
+description: A Helm chart for Kubernetes gwx-app chart with istio-gateway
+name: gwx-app
+type: application
+version: 0.1.1

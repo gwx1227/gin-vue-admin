@@ -1,0 +1,82 @@
+currentEnv: test
+namespace: gwx1
+appname: gwx-test-app-01
+hpaMode:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpuTargetAverageUtilization: 70
+  memTargetAverageValue: 500Mi
+image:
+  repository: ikubernetes/myapp
+  tagOnline: v2
+  tagCanary: v1
+  pullPolicy: IfNotPresent
+  containerPort: 80
+  weightOnline: 80
+  weightCanary: 20
+  replicaCountOnline: 2
+  replicaCountCanary: 1
+  commandEnable: false
+  commandInfo: []
+  argsEnable: false
+  argsInfo: []
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceaccount:
+  create: false
+  annotations: {}
+  name: ""
+metrics:
+  enabled: true
+  port: 80
+  path: /metrics
+readiness:
+  enabled: true
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  path: /
+  periodSeconds: 3
+  successThreshold: 1
+  timeoutSeconds: 2
+service:
+  type: ClusterIP
+  port: 80
+liveness:
+  enabled: true
+  path: /
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 3
+  timeoutSeconds: 2
+  successThreshold: 1
+hostAlias:
+  enabled: true
+podhostAlias:
+- hostNames: gwx.test.com
+  ip: 127.0.0.1
+gateway:
+  enabled: true
+gateway_hosts:
+- hosts: gwx-test-app.gwxtest.com
+gateway_data:
+- hosts: gwx-test-app.gwxtest.com
+  paths: /
+  weight_online: 66
+  weight_canary: 34
+- hosts: gwx-test-app.gwxtest.com
+  paths: /hostname.html
+  weight_online: 50
+  weight_canary: 50
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
+nodeSelector: {}
+tolerations: []
+podSecurityContext: {}
+securityContext: {}

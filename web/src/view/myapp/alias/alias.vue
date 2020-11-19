@@ -1,7 +1,7 @@
 <template>
   <div v-if="currentAppId !== null">
  <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
-      <el-button type="primary" round @click="dialogFormVisibleAdd = true">添加劫持</el-button>
+      <el-button type="primary" round @click="dialogFormVisibleAdd = true">添加域名劫持</el-button>
       <el-dialog append-to-body title="添加配置" :visible.sync="dialogFormVisibleAdd">
         <el-form :model="addData">
           <el-form-item label="IP" :label-width="formLabelWidth">

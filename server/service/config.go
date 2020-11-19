@@ -24,7 +24,7 @@ func CreateConfig(config model.Config) (err error) {
 // @return                    error
 
 func DeleteConfig(config model.Config) (err error) {
-	err = global.GVA_DB.Debug().Where("id = ?", config.ID).Delete(config).Error
+	err = global.GVA_DB.Where("id = ?", config.ID).Delete(config).Error
 	return err
 }
 
@@ -46,7 +46,7 @@ func DeleteConfigByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateConfig(config *model.Config) (err error) {
-	err = global.GVA_DB.Debug().Where("app_id = ? and id = ?",config.AppId,config.ID).Updates(model.Config{Value: config.Value}).Error
+	err = global.GVA_DB.Where("app_id = ? and id = ?",config.AppId,config.ID).Updates(model.Config{Value: config.Value}).Error
 	return err
 }
 
@@ -88,8 +88,8 @@ func GetConfigInfoListByAppId(info request.ConfigSearch) (err error, list interf
 	db := global.GVA_DB.Model(&model.Config{})
 	var configs []model.Config
 	// 如果有条件搜索 下方会自动创建搜索语句
-	err = db.Debug().Where("app_id = ?", info.AppId).Count(&total).Error
-	err = db.Debug().Limit(limit).Offset(offset).Where("app_id = ?", info.AppId).Find(&configs).Error
+	err = db.Where("app_id = ?", info.AppId).Count(&total).Error
+	err = db.Limit(limit).Offset(offset).Where("app_id = ?", info.AppId).Find(&configs).Error
 	return err, configs, total
 }
 

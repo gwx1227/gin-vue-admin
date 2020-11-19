@@ -403,10 +403,10 @@ export default {
         ],
         git_url: [
           { required: true, message: '请输入git地址', trigger: 'blur' },
-          { required: true, pattern: /(^git@.\\:.\/.\.git$)/, message: '请输入正确的SSH格式的git地址', trigger: 'blur' }
+          { required: true, pattern: /(^git@.:.\/.\.git$)/, message: '请输入正确的SSH格式的git地址', trigger: 'blur' }
         ],
         app_name: [
-          { required: true, message: '请输入应用名称', trigger: 'blur' }
+          // { required: true, message: '请输入应用名称', trigger: 'blur' }
         ],
         business_id: [
           { required: true, message: '请选择对应主业务线信息', trigger: 'blur' }

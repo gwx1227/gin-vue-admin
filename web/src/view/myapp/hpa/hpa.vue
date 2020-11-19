@@ -10,7 +10,8 @@
             active-text="开"
             @change="change_switch"
           /><br>
-          <el-button type="primary" round @click="openEdit()">编辑信息</el-button><br>
+           <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
+          <el-button type="primary" round @click="openEdit()">调整自动伸缩配置</el-button><br>
     <el-dialog append-to-body title="修改监控接入配置" :visible.sync="dialogFormVisible">
       <el-form :model="editData">
         <el-form-item :label-width="formLabelWidth">
@@ -39,6 +40,7 @@
         <el-button type="primary" @click="editHpaData()">确 定</el-button>
       </div>
     </el-dialog>
+           </el-row>
     <el-card>
       <el-form
         :model="hpa"

@@ -1,0 +1,141 @@
+# 标识当前环境信息
+currentEnv:
+namespace:
+appname:
+
+
+
+# 是否开启自动扩展,自动扩展的最小副本数、最大副本数,以及自动扩展时,基于内存与CPU的阈值设定
+hpaMode:
+  enabled:
+  minReplicas:
+  maxReplicas:
+  cpuTargetAverageUtilization:
+  memTargetAverageValue:
+
+
+# docker镜像信息,仓库地址、镜像版本、镜像拉取策略、容器内应用启动端口
+image:
+  repository:
+  tagOnline:
+  tagCanary:
+  pullPolicy:
+  containerPort:
+  weightOnline:
+  weightCanary:
+  replicaCountOnline:
+  replicaCountCanary:
+  commandEnable:
+  commandInfo: []
+  argsEnable:
+  argsInfo: []
+
+# 镜像私服拉取的相关配置信息
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+
+
+
+# 是否创建对应sa,用于RBAC
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+
+# 是否开启prom自动发现,以及用于提供metrics抓取的对应端口信息
+metrics:
+  enabled:
+  port:
+  path:
+
+
+# 对应svc信息,默认均为ClusterIP形式的80端口
+service:
+  type: ClusterIP
+  port: 80
+
+
+# 是否开启健康检查.就绪检查接口、连续失败次数、延迟探测时长、探测时间间隔、探测超时时长、探测成功次数、
+liveness:
+  enabled:
+  path:
+  failureThreshold:
+  initialDelaySeconds:
+  periodSeconds:
+  timeoutSeconds:
+  successThreshold:
+
+
+# 是否开启就绪检查.就绪检查接口、连续失败次数、延迟探测时长、探测时间间隔、探测超时时长、探测成功次数、
+readiness:
+  enabled:
+  path:
+  failureThreshold:
+  initialDelaySeconds:
+  periodSeconds:
+  timeoutSeconds:
+  successThreshold:
+
+
+# 是否开启host劫持注入,hostNames为列表形式
+hostAlias:
+  enabled: true
+podhostAlias:
+  - ip:
+    hostNames:
+
+
+
+# 是否开启环境变量注入,valus会转变为字符串格式
+envConfig:
+  K8S_CLUSTER: gwx-online
+
+
+
+# 是否注入istio-gateway.hosts为该应用可以使用的域名,paths为对应开发的uri,默认为"/",如果不在指定放开的uri列表,访问会404
+gateway:
+  enabled:
+  gateway_hosts: []
+  gateway_data:
+  - hosts:
+    paths:
+
+
+
+
+# 资源限制相关,limint为最大使用边界,requests为pod启动预期资源(影响预选及优选过程)
+resources:
+  limits:
+    cpu:
+    memory:
+  requests:
+    cpu:
+    memory:
+
+
+# node亲和性相关,如果指定nodeName则为硬亲和,如果选定部分label的node会在预选阶段跟倾向于具有该label的node,比如部分GPU的服务或者是SSD需求.
+nodeSelector: {}
+
+
+# 容忍污点.如非特殊需求,不建议容忍.
+tolerations: []
+
+
+# 亲和性配置.
+affinity: {}
+
+
+# 安全策略相关
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000

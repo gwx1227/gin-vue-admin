@@ -1,0 +1,87 @@
+affinity: {}
+appname: gwx-app-01
+currentEnv: online
+envConfig:
+  CLUSTER: gwx_cluster
+  NAME: gwx
+fullnameOverride: ''
+gateway:
+  enabled: true
+  gateway_data:
+  - hosts: gwx-apps.gwxtest.com
+    paths: /
+    weight_canary: 1
+    weight_online: 99
+  - hosts: gwx-test.gwxtest.com
+    paths: /hostname.html
+    weight_canary: 20
+    weight_online: 80
+hostAlias:
+  enabled: true
+hpaMode:
+  cpuTargetAverageUtilization: 60
+  enabled: false
+  maxReplicas: 10
+  memTargetAverageValue: 70Mi
+  minReplicas: 2
+image:
+  argsEnable: false
+  argsInfo: []
+  commandEnable: false
+  commandInfo: []
+  containerPort: 8080
+  pullPolicy: Never
+  replicaCountCanary: 1
+  replicaCountOnline: 3
+  repository: tomcat
+  tagCanary: v2
+  tagOnline: v11
+  weightCanary: 1
+  weightOnline: 99
+imagePullSecrets: []
+liveness:
+  enabled: false
+  failureThreshold: 3
+  initialDelaySeconds: 20
+  path: /
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 2
+metrics:
+  enabled: true
+  path: /
+  port: 8888
+nameOverride: ''
+namespace: app
+nodeSelector: {}
+podSecurityContext: {}
+podhostAlias:
+- hostNames: gwx-apps.gwxtest.com
+  ip: 192.168.0.1
+- hostNames: my-mac.gwxtest.com
+  ip: 192.168.0.2
+readiness:
+  enabled: false
+  failureThreshold: 3
+  initialDelaySeconds: 20
+  path: /
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 2
+resources:
+  limits:
+    cpu: 300m
+    memory: 301Mi
+  requests:
+    cpu: 300m
+    memory: 301Mi
+securityContext: {}
+service:
+  port: 80
+  type: ClusterIP
+serviceAccount:
+  annotations: {}
+  create: true
+  name: null
+tolerations: []
+

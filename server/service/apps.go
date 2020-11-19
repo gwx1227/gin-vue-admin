@@ -14,7 +14,7 @@ import (
 // @return    err             error
 
 func CreateApps(apps model.Apps) (err error,appId uint) {
-	err = global.GVA_DB.Debug().Create(&apps).Error
+	err = global.GVA_DB.Create(&apps).Error
 	appId = apps.ID
 	return err,appId
 }
@@ -53,7 +53,7 @@ func UpdateApps(apps *model.Apps) (err error) {
 }
 
 func UpdateAppsSwitch(apps *model.Apps) (err error) {
-	err = global.GVA_DB.Debug().Where("id = ? ", apps.ID).Updates(apps).Error
+	err = global.GVA_DB.Where("id = ? ", apps.ID).Updates(apps).Error
 	return err
 }
 
@@ -65,10 +65,13 @@ func UpdateAppsSwitch(apps *model.Apps) (err error) {
 // @return    Apps        Apps
 
 func GetApps(id uint) (err error, apps []response.AppInfo) {
-	err = global.GVA_DB.Debug().Table("apps").Select("apps.*,business.business,sub_business.subbusiness ").Where("apps.id = ?", id).Joins("left join sub_business on sub_business.id = apps.subbusiness_id").Joins("left join business on business.id = apps.business_id").Scan(&apps).Error
+	err = global.GVA_DB.Table("apps").Select("apps.*,business.business,sub_business.subbusiness").Where("apps.id = ?", id).Joins("left join sub_business on sub_business.id = apps.subbusiness_id").Joins("left join business on business.id = apps.business_id").Scan(&apps).Error
 	return
 }
-
+func GetAppsByAppId(appId uint) (err error, apps response.AppInfoNamespacs) {
+	err = global.GVA_DB.Table("apps").Select("apps.app_name,namespaces.namespace ").Where("apps.id = ?", appId).Joins("left join namespaces on namespaces.id = apps.namespace_id").Scan(&apps).Error
+	return
+}
 // @title    GetAppsInfoList
 // @description   get Apps list by pagination, 分页获取Apps
 // @auth                     （2020/04/05  20:22）
@@ -94,11 +97,11 @@ func GetAppsInfoListByNamespaceId(info request.AppsSearch) (err error, list inte
 	db := global.GVA_DB.Model(&model.Apps{})
 	var appss []model.Apps
 	// 如果有条件搜索 下方会自动创建搜索语句
-	err = db.Debug().Where("namespace_id = ? ", info.NamespaceId).Count(&total).Error
+	err = db.Where("namespace_id = ? ", info.NamespaceId).Count(&total).Error
 	if info.ID != 0 {
-		err = db.Debug().Limit(limit).Offset(offset).Where("namespace_id = ? AND id = ?", info.NamespaceId, info.ID).Find(&appss).Error
+		err = db.Limit(limit).Offset(offset).Where("namespace_id = ? AND id = ?", info.NamespaceId, info.ID).Find(&appss).Error
 	}else {
-		err = db.Debug().Limit(limit).Offset(offset).Where("namespace_id = ?", info.NamespaceId).Find(&appss).Error
+		err = db.Limit(limit).Offset(offset).Where("namespace_id = ?", info.NamespaceId).Find(&appss).Error
 	}
 	return err, appss, total
 }

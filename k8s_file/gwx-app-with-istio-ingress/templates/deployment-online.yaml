@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-online
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ include "gwx-app.fullname" . }}
+    version: prod
+    {{- include "gwx-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.image.replicaCountOnline }}
+  selector:
+    matchLabels:
+      env: online
+      app: {{ include "gwx-app.fullname" . }}
+      version: prod
+      {{- include "gwx-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "gwx-app.fullname" . }}
+        version: prod
+        {{- include "gwx-app.selectorLabels" . | nindent 8 }}
+        env: online
+      annotations:
+        {{- if and .Values.metrics.enabled }}
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: {{ .Values.metrics.port | default .Values.image.containerPort |quote}}
+        {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets  }}
+      imagePullSecrets:
+        {{- toYaml  . | nindent 8 }}
+    {{- end }}
+      {{- if and .Values.hostAlias.enabled .Values.podhostAlias }}
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "localhost" 
+      {{- range .Values.podhostAlias }} 
+      - ip: {{ .ip | quote }}
+        hostnames:
+        - {{ .hostNames |quote}}
+        {{- end}}  
+      {{- end }}  
+      serviceAccountName: {{ include "gwx-app.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: post-info
+          image: busybox
+          env:
+            - name: MY_NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: MY_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          command: ['wget', '-O', '-', '-q', 'http://10.16.210.131:5000/podinfo?action=注册&pod_ip=$(MY_POD_IP)&node_ip=$(MY_NODE_IP)&pod_name=$(MY_POD_NAME)&node_name=$(MY_NODE_NAME)']
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tagOnline  | default "latest"}}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MY_NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: MY_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+          - configMapRef:
+              name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-env-config
+          ports:
+            - name: http
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+          {{- if and .Values.image.commandEnable .Values.image.commandInfo}}    
+          command: 
+          {{- range .Values.image.commandInfo}}
+          - {{. |quote -}}
+          {{end -}}
+          {{ end }}   
+          {{- if and .Values.image.argsEnable .Values.image.argsInfo}}    
+          args: 
+          {{- range .Values.image.argsInfo}}
+          - {{ . | quote -}}
+          {{end -}}
+          {{ end }}  
+          {{- if .Values.liveness.enabled }} 
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.liveness.path | default "/"| quote}}
+              port: http
+            failureThreshold: {{ .Values.liveness.failureThreshold | default 3}}
+            initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds | default 20}}
+            periodSeconds: {{ .Values.liveness.periodSeconds | default 10}}
+            successThreshold: {{ .Values.liveness.successThreshold | default 1  }}
+            timeoutSeconds: {{ .Values.liveness.timeoutSeconds | default 2}}
+          {{- end -}} 
+          {{- if .Values.readiness.enabled }}   
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readiness.path | default "/"| quote}}
+              port: http
+            failureThreshold: {{ .Values.readiness.failureThreshold | default 3  }} 
+            initialDelaySeconds: {{ .Values.readiness.initialDelaySeconds | default 20  }}
+            periodSeconds: {{ .Values.readiness.periodSeconds | default 10  }}
+            successThreshold: {{ .Values.readiness.successThreshold | default 1  }}
+            timeoutSeconds: {{ .Values.readiness.timeoutSeconds | default 2  }} 
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

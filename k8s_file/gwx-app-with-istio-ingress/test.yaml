@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+
+
+metadata:
+  name: gwx-app-02-online
+  namespace: app
+spec:
+  hosts:
+  - test.com
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: gwx-app-02-online
+        subset: online
+      weight: 99
+    - destination:
+        port:
+          number: 80
+        host: gwx-app-02-online
+        subset: canary
+      weight: 1

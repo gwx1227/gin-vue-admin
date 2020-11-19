@@ -78,6 +78,7 @@ func DeleteMetricsByIds(c *gin.Context) {
 func UpdateMetrics(c *gin.Context) {
 	var metrics model.Metrics
 	_ = c.ShouldBindJSON(&metrics)
+	fmt.Printf("....... %v\n\n", metrics.Port)
 	err := service.UpdateMetrics(&metrics)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("更新失败，%v", err), c)
@@ -97,7 +98,7 @@ func UpdateMetrics(c *gin.Context) {
 func FindMetrics(c *gin.Context) {
 	var metrics model.Metrics
 	_ = c.ShouldBindQuery(&metrics)
-	err, remetrics := service.GetMetrics(metrics.ID)
+	err, remetrics := service.GetMetrics(metrics.AppId)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {

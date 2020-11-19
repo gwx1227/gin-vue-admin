@@ -10,7 +10,7 @@
       @change="change_gateway_switch"
     />
     <el-row style="font-size: 26px;line-height: 26px;margin-bottom: 20px;padding:20px;">
-      <el-button type="primary" :disabled="!gatewaySwitch" round @click="dialogFormVisibleAdd = true">添加域名</el-button>
+      <el-button type="primary" :disabled="!gatewaySwitch" round @click="dialogFormVisibleAdd = true">申请域名</el-button>
       <el-dialog append-to-body title="添加域名" :visible.sync="dialogFormVisibleAdd">
         <el-form :model="addData">
           <el-form-item label="域名" :label-width="formLabelWidth">

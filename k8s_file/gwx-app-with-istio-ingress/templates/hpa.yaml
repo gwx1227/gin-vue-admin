@@ -1,0 +1,23 @@
+{{ if .Values.hpaMode.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-hpa
+  namespace: {{ .Values.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-online
+  minReplicas: {{ .Values.hpaMode.minReplicas |default 2 }}
+  maxReplicas: {{ .Values.hpaMode.maxReplicas |default 10 }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: {{ .Values.hpaMode.cpuTargetAverageUtilization | default 200 }}
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageValue: {{ .Values.hpaMode.memTargetAverageValue | default "120Mi"| quote }}
+{{end}}

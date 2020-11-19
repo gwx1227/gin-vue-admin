@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-env-config
+  labels:
+    {{- include "gwx-app.labels"  . | nindent 4 }}
+data: 
+  K8S_ADMIN: "GongWenxuan"
+{{- if .Values.envConfig }}
+{{- range $key, $value :=  .Values.envConfig }}
+{{ $key | indent 2 }}: {{ $value | quote }}
+{{- end }}
+{{end }}

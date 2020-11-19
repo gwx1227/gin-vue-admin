@@ -7,7 +7,11 @@ import (
 	"gin-vue-admin/model/request"
 	resp "gin-vue-admin/model/response"
 	"gin-vue-admin/service"
+	"gin-vue-admin/utils"
 	"github.com/gin-gonic/gin"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"log"
 )
 
 // @Tags Namespaces
@@ -21,7 +25,24 @@ import (
 func CreateNamespaces(c *gin.Context) {
 	var namespaces model.Namespaces
 	_ = c.ShouldBindJSON(&namespaces)
-	err := service.CreateNamespaces(namespaces)
+	namespace := &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: namespaces.Namespace,
+			Labels:map[string]string{
+				"istio-injection": "enabled",
+			},
+
+		},
+	}
+	kubeclient,err := utils.KubeClient()
+	if err != nil {
+		log.Panicf("获取kubeclinet 异常: %v\n",err)
+	}
+	_, err = kubeclient.CoreV1().Namespaces().Create(namespace)
+	if err != nil {
+		log.Panicf("创建namespace %v 异常: %v\n",namespaces.Namespace,err)
+	}
+	err = service.CreateNamespaces(namespaces)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("创建失败，%v", err), c)
 	} else {

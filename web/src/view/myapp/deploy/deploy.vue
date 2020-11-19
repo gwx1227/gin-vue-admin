@@ -209,7 +209,6 @@
     </el-form><br>
     <div style="text-align:center">
       <el-button round type="info" @click="onClose">取消</el-button>
-      <el-button round type="info" @click="getInfo">test</el-button>
       <el-button
         round
         type="primary"

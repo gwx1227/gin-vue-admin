@@ -58,6 +58,7 @@ func Routers() *gin.Engine {
 	router.InitReadinessRouter(ApiGroup)             // 就绪检查配置相关路由
 	router.InitResourcesRouter(ApiGroup)             // 资源配置相关路由
 	router.InitSysConfigRouter(ApiGroup)             // 系统变量配置相关路由
+	router.InitKubeRouter(ApiGroup)             // 动态kubernetes信息相关路由
 
 	global.GVA_LOG.Info("router register success")
 	return Router

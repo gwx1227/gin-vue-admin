@@ -46,7 +46,7 @@ func DeleteReadinessByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateReadiness(readiness *model.Readiness) (err error) {
-	err = global.GVA_DB.Save(readiness).Error
+	err = global.GVA_DB.Where("app_id = ?", readiness.AppId).Updates(readiness).Error
 	return err
 }
 
@@ -57,11 +57,15 @@ func UpdateReadiness(readiness *model.Readiness) (err error) {
 // @return                    error
 // @return    Readiness        Readiness
 
-func GetReadiness(id uint) (err error, readiness model.Readiness) {
-	err = global.GVA_DB.Where("id = ?", id).First(&readiness).Error
+func GetReadiness(appId uint) (err error, readiness model.Readiness) {
+	err = global.GVA_DB.Where("app_id = ?", appId).First(&readiness).Error
 	return
 }
 
+func GetReadinessByAppId(appId uint) (err error, readiness model.Readiness) {
+	err = global.GVA_DB.Where("app_id = ?", appId).First(&readiness).Error
+	return
+}
 // @title    GetReadinessInfoList
 // @description   get Readiness list by pagination, 分页获取Readiness
 // @auth                     （2020/04/05  20:22）

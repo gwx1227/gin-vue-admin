@@ -1,0 +1,59 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+{{ $appname := include "gwx-app.fullname" . }}
+{{ $appenv := .Values.currentEnv }}
+metadata:
+  name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}
+  namespace: {{ .Values.namespace }}
+spec:
+  hosts:
+  {{ if .Values.gateway.enabled }}
+      {{- range .Values.gateway_hosts}}
+  - {{.hosts -}}
+  {{end }}
+  
+  gateways:
+  - {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-gateway
+  {{ else }}
+  - {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}
+      
+  {{ end }}
+  http:
+      {{- if .Values.gateway.enabled }}
+      {{- range  .Values.gateway_data}}
+  - match:  
+    - uri:
+        prefix: {{ .paths }}
+    route:
+    - destination:
+        port:
+          number: 80
+        host: {{ $appname }}-{{ $appenv }}-svc
+        subset: online
+      weight: {{ .weight_online }}
+    - destination:
+        port:
+          number: 80
+        host: {{ $appname }}-{{ $appenv }}-svc
+        subset: canary
+      weight: {{ .weight_canary }}    
+              {{ end -}}
+    {{else}}
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        port:
+          number: 80
+        host: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-svc
+        subset: online
+      weight: {{ .Values.image.weightOnline }}
+    - destination:
+        port:
+          number: 80
+        host: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-svc
+        subset: canary
+      weight: {{ .Values.image.weightCanary }}
+      {{end}}
+

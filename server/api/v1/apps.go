@@ -24,6 +24,11 @@ func CreateApps(c *gin.Context) {
 	err,appId := service.CreateApps(model.Apps{AppName: apps.AppName,BusinessId: apps.BusinessId, CreateUser: apps.CreateUser, CurrentEnv: apps.CurrentEnv, GatewaySwitch: apps.GatewaySwitch, GitUrl: apps.GitUrl, HpaSwitch: apps.HpaSwitch,Language: apps.Language, LivenessSwitch: apps.LivenessSwitch, MetricsSwitch: apps.MetricsSwitch, NamespaceId: apps.NamespaceId,ReadinessSwitch: apps.ReadinessSwitch,SubbusinessId: apps.SubbusinessId,UpdateUser: apps.UpdateUser,})
 	fmt.Printf("......%v\n\n...%v\n\n", apps.Repository,apps.CommandInfo)
 	_ = service.CreateDeploy(model.Deploy{AppId: appId, ArgsSwitch: apps.ArgsSwitch, ArgsInfo: apps.ArgsInfo, CommandInfo: apps.CommandInfo, CommandSwitch: apps.CommandSwitch, ContainerPort: apps.ContainerPort, PullPolicy: apps.PullPolicy, Repository: apps.Repository})
+	_ = service.CreateHpa(model.Hpa{AppId: appId})
+	_ = service.CreateLiveness(model.Liveness{AppId: appId})
+	_ = service.CreateMetrics(model.Metrics{AppId: appId})
+	_ = service.CreateReadiness(model.Readiness{AppId: appId})
+	_ = service.CreateResources(model.Resources{AppId: appId,CpuLimit: apps.CpuLimit, CpuRequests: apps.CpuRequests, MemLimit: apps.MemLimit, MemRequests: apps.MemRequests})
 	if err != nil  {
 		response.FailWithMessage(fmt.Sprintf("创建失败，%v", err), c)
 	} else {

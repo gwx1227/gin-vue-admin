@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ include "gwx-app.fullname" . }}-{{ .Values.currentEnv}}-svc
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+  - name: online
+    labels:
+      env : online
+  - name: canary
+    labels:
+      env: canary

@@ -62,6 +62,7 @@ func GetDeployHistory(id uint) (err error, deployHistory model.DeployHistory) {
 	return
 }
 
+
 // @title    GetDeployHistoryInfoList
 // @description   get DeployHistory list by pagination, 分页获取DeployHistory
 // @auth                     （2020/04/05  20:22）
@@ -75,7 +76,15 @@ func GetDeployHistoryInfoList(info request.DeployHistorySearch) (err error, list
 	db := global.GVA_DB.Model(&model.DeployHistory{})
 	var deployHistorys []model.DeployHistory
 	// 如果有条件搜索 下方会自动创建搜索语句
-	err = db.Count(&total).Error
-	err = db.Limit(limit).Offset(offset).Find(&deployHistorys).Error
+	err = db.Where("app_id = ?",info.AppId).Count(&total).Error
+	err = db.Where("app_id = ?",info.AppId).Limit(limit).Offset(offset).Find(&deployHistorys).Error
 	return err, deployHistorys, total
 }
+
+func GetDeployHistoryInfoTotal(appId uint) (err error,total int64) {
+	db := global.GVA_DB.Model(&model.DeployHistory{})
+	// 如果有条件搜索 下方会自动创建搜索语句
+	err = db.Where("app_id = ? and result = 'success'",appId).Count(&total).Error
+	return err, total
+}
+

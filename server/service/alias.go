@@ -4,6 +4,7 @@ import (
 	"gin-vue-admin/global"
 	"gin-vue-admin/model"
 	"gin-vue-admin/model/request"
+	"gin-vue-admin/model/response"
 )
 
 // @title    CreateAlias
@@ -13,7 +14,7 @@ import (
 // @return    err             error
 
 func CreateAlias(alias model.Alias) (err error) {
-	err = global.GVA_DB.Debug().Create(&alias).Error
+	err = global.GVA_DB.Create(&alias).Error
 	return err
 }
 
@@ -24,7 +25,7 @@ func CreateAlias(alias model.Alias) (err error) {
 // @return                    error
 
 func DeleteAlias(alias model.Alias) (err error) {
-	err = global.GVA_DB.Debug().Where("id = ?", alias.ID).Delete(alias).Error
+	err = global.GVA_DB.Where("id = ?", alias.ID).Delete(alias).Error
 	return err
 }
 
@@ -36,7 +37,7 @@ func DeleteAlias(alias model.Alias) (err error) {
 
 func DeleteAliasByIds(ids request.IdsReq) (err error) {
 
-	err = global.GVA_DB.Debug().Delete(&[]model.Alias{}, "id in ?", ids.Ids).Error
+	err = global.GVA_DB.Delete(&[]model.Alias{}, "id in ?", ids.Ids).Error
 	return err
 }
 
@@ -47,8 +48,7 @@ func DeleteAliasByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateAlias(alias *model.Alias) (err error) {
-	//err = global.GVA_DB.Debug().Save(alias).Error
-	err = global.GVA_DB.Debug().Where("app_id = ? and hostname = ?", alias.AppId,alias.Hostname).Updates(model.Alias{Ip:alias.Ip}).Error
+	err = global.GVA_DB.Where("app_id = ? and hostname = ?", alias.AppId,alias.Hostname).Updates(model.Alias{Ip:alias.Ip}).Error
 	return err
 }
 
@@ -63,9 +63,10 @@ func GetAlias(id uint) (err error, alias model.Alias) {
 	err = global.GVA_DB.Where("id = ?", id).First(&alias).Error
 	return
 }
-func GetAliasByAppId(app_id uint) (err error, alias model.Alias) {
-	err = global.GVA_DB.Where("app_id = ?", app_id).First(&alias).Error
-	return
+func GetAliasByAppId(appId uint) (err error, aliasData []response.PodHostAlias) {
+	db := global.GVA_DB.Model(&model.Alias{})
+	err = db.Select("hostname,ip").Where("app_id = ?", appId).Find(&aliasData).Error
+	return err, aliasData
 }
 
 // @title    GetAliasInfoList
@@ -94,7 +95,7 @@ func GetAliasInfoListByAppId(info request.AliasSearch) (err error, list interfac
 	db := global.GVA_DB.Model(&model.Alias{})
 	var aliass []model.Alias
 	// 如果有条件搜索 下方会自动创建搜索语句
-	err = db.Debug().Where("app_id = ?", info.AppId).Count(&total).Error
-	err = db.Debug().Limit(limit).Offset(offset).Where("app_id = ?", info.AppId).Find(&aliass).Error
+	err = db.Where("app_id = ?", info.AppId).Count(&total).Error
+	err = db.Limit(limit).Offset(offset).Where("app_id = ?", info.AppId).Find(&aliass).Error
 	return err, aliass, total
 }

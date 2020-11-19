@@ -46,7 +46,7 @@ func DeleteMetricsByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateMetrics(metrics *model.Metrics) (err error) {
-	err = global.GVA_DB.Save(metrics).Error
+	err = global.GVA_DB.Where("app_id = ?", metrics.AppId).Updates(metrics).Error
 	return err
 }
 
@@ -57,8 +57,8 @@ func UpdateMetrics(metrics *model.Metrics) (err error) {
 // @return                    error
 // @return    Metrics        Metrics
 
-func GetMetrics(id uint) (err error, metrics model.Metrics) {
-	err = global.GVA_DB.Where("id = ?", id).First(&metrics).Error
+func GetMetrics(appId uint) (err error, metrics model.Metrics) {
+	err = global.GVA_DB.Where("app_id = ?", appId).First(&metrics).Error
 	return
 }
 

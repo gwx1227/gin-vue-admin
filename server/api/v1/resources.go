@@ -97,7 +97,7 @@ func UpdateResources(c *gin.Context) {
 func FindResources(c *gin.Context) {
 	var resources model.Resources
 	_ = c.ShouldBindQuery(&resources)
-	err, reresources := service.GetResources(resources.ID)
+	err, reresources := service.GetResources(resources.AppId)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {

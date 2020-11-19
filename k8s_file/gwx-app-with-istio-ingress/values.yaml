@@ -1,0 +1,81 @@
+currentEnv: test
+namespace: gwx1
+appname: gwx_app1
+hpaMode:
+  enabled: true
+  minReplicas: 4
+  maxReplicas: 10
+  cpuTargetAverageUtilization: 70
+  memTargetAverageValue: 2Gi
+image:
+  repository: /my_app111
+  tagOnline: v_online_01
+  tagCanary: v_canary_01
+  pullPolicy: IfNotPresent
+  containerPort: 8080
+  weightOnline: 91
+  weightCanary: 9
+  replicaCountOnline: 2
+  replicaCountCanary: 0
+  commandEnable: true
+  commandInfo: []
+  argsEnable: true
+  argsInfo: []
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+metrics:
+  enabled: false
+  port: 8081
+  path: /metrics
+readiness:
+  enabled: true
+  failureThreshold: 5
+  initialDelaySeconds: 12
+  path: /healthcheck1
+  periodSeconds: 5
+  successThreshold: 3
+  timeoutSeconds: 4
+service:
+  type: ClusterIP
+  port: 80
+liveness:
+  enabled: true
+  path: /healthcheck
+  failureThreshold: 4
+  initialDelaySeconds: 11
+  periodSeconds: 4
+  timeoutSeconds: 3
+  successThreshold: 2
+hostAlias:
+  enabled: true
+podhostAlias:
+- hostNames: gwxtest.test.com
+  ip: 11.12.2.11
+- hostNames: gwx-test1.test.com
+  ip: 127.0.0.1
+gateway:
+  enabled: true
+gateway_hosts:
+- hosts: gwx_test.test.cn
+gateway_data:
+- hosts: gwx_test.test.cn
+  paths: /*
+  weight_online: 78
+  weight_canary: 22
+resources:
+  limits:
+    cpu: "1"
+    memory: 1Gi
+  requests:
+    cpu: "1"
+    memory: 1Gi
+nodeSelector: {}
+tolerations: []
+podSecurityContext: {}
+securityContext: {}
+

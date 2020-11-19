@@ -13,7 +13,7 @@ type Deploy struct {
 	ArgsSwitch         *bool  `json:"argsSwitch" form:"argsSwitch" gorm:"column:args_switch;not null;default:false;comment:是否开启args"`
 	CommandInfo        string `json:"commandInfo" form:"commandInfo" gorm:"column:command_info;comment:command内容"`
 	CommandSwitch      *bool  `json:"commandSwitch" form:"commandSwitch" gorm:"column:command_switch;not null;default:false;comment:是否开启command"`
-	ContainerPort      int    `json:"containerPort" form:"containerPort" gorm:"column:container_port;not null;comment:容器port"`
+	ContainerPort      string    `json:"containerPort" form:"containerPort" gorm:"column:container_port;not null;comment:容器port"`
 	PullPolicy         string `json:"pullPolicy" form:"pullPolicy" gorm:"column:pull_policy;not null;default:'IfNotPresent';comment:拉取镜像策略"`
 	ReplicaCountCanary int    `json:"replicaCountCanary" form:"replicaCountCanary" gorm:"column:replica_count_canary;not null;default:0;comment:canary副本数"`
 	ReplicaCountOnline int    `json:"replicaCountOnline" form:"replicaCountOnline" gorm:"column:replica_count_online;not null;default:2;comment:online副本数"`

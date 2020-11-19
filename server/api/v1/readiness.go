@@ -97,7 +97,7 @@ func UpdateReadiness(c *gin.Context) {
 func FindReadiness(c *gin.Context) {
 	var readiness model.Readiness
 	_ = c.ShouldBindQuery(&readiness)
-	err, rereadiness := service.GetReadiness(readiness.ID)
+	err, rereadiness := service.GetReadiness(readiness.AppId)
 	if err != nil {
 		response.FailWithMessage(fmt.Sprintf("查询失败，%v", err), c)
 	} else {

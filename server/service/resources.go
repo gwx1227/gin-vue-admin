@@ -46,7 +46,7 @@ func DeleteResourcesByIds(ids request.IdsReq) (err error) {
 // @return                    error
 
 func UpdateResources(resources *model.Resources) (err error) {
-	err = global.GVA_DB.Save(resources).Error
+	err = global.GVA_DB.Where("app_id = ?", resources.AppId).Updates(resources).Error
 	return err
 }
 
@@ -57,11 +57,14 @@ func UpdateResources(resources *model.Resources) (err error) {
 // @return                    error
 // @return    Resources        Resources
 
-func GetResources(id uint) (err error, resources model.Resources) {
-	err = global.GVA_DB.Where("id = ?", id).First(&resources).Error
+func GetResources(appId uint) (err error, resources model.Resources) {
+	err = global.GVA_DB.Where("app_id = ?", appId).First(&resources).Error
 	return
 }
-
+func GetResourcesByAppId(appId uint) (err error, resources model.Resources) {
+	err = global.GVA_DB.Where("app_id = ?", appId).First(&resources).Error
+	return
+}
 // @title    GetResourcesInfoList
 // @description   get Resources list by pagination, 分页获取Resources
 // @auth                     （2020/04/05  20:22）
